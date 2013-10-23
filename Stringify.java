@@ -157,7 +157,10 @@ public class Stringify {
                         if (i > 0) {
                             buf.append(",");
                         }
-                        if (type.toString().startsWith("class [Ljava.lang.String;")) {
+                        if (type.toString().startsWith("class [C")) {
+                            buf.append("[" + i + "]='").
+                                    append(Array.get(field.get(this.object), i)).append("'");
+                        } else if (type.toString().startsWith("class [Ljava.lang.String;")) {
                             buf.append("[" + i + "]=\"").
                                     append(Array.get(field.get(this.object), i)).append("\"");
                         } else {
@@ -168,7 +171,9 @@ public class Stringify {
                     buf.append("};");
                 } else {
                     Object value = field.get(this.object);
-                    if (type.toString().endsWith(".String")) {
+                    if (type.toString().startsWith("char")) {
+                        buf.append(name + "='" + value.toString() + "';");
+                    } else if (type.toString().endsWith(".String")) {
                         buf.append(name + "=\"" + value.toString() + "\";");
                     } else {
                         buf.append(name + "=" + value.toString() + ";");
@@ -182,5 +187,4 @@ public class Stringify {
         buf.append("}");
         return buf.toString();
     }
-    
 }
