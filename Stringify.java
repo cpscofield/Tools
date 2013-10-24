@@ -55,7 +55,7 @@ import java.lang.reflect.*;
  * The output will look like the following:
  * </p>
  * <code>
- * {i=5;x=3.4;y=1.2;t=true;f=false;c=A;s="LetErRip";l=-1;j=16363;a:{[0]=1,[1]=2,[2]=3,[3]=4};card="429036049519943"}
+ * {i=5;x=3.4;y=1.2;t=true;f=false;c='A';s="LetErRip";l=-1;j=16363;a:{[0]=1,[1]=2,[2]=3,[3]=4};card="429036049519943"}
  * </code>
  * <p>
  * If, for example, you wanted to exclude the field 'card' from the output:
