@@ -42,7 +42,6 @@ import java.lang.reflect.*;
  *       private short j = 16363;
  *       private int[] a = { 1, 2, 3, 4 };
  *       private String card = "429036049519943";
- *       }
  * </code>
  * <p>
  * The contents of the object can be displayed thusly:
@@ -55,7 +54,7 @@ import java.lang.reflect.*;
  * The output will look like the following:
  * </p>
  * <code>
- * {i=5;x=3.4;y=1.2;t=true;f=false;c='A';s="LetErRip";l=-1;j=16363;a:{[0]=1,[1]=2,[2]=3,[3]=4};card="429036049519943"}
+ * {i=5;x=3.4;y=1.2;t=true;f=false;c=A;s="LetErRip";l=-1;j=16363;a:{[0]=1,[1]=2,[2]=3,[3]=4};card="429036049519943"}
  * </code>
  * <p>
  * If, for example, you wanted to exclude the field 'card' from the output:
@@ -84,6 +83,7 @@ public class Stringify {
     private Set<String> excludedNames = new HashSet<String>();
     private Set<String> includedNames = new HashSet<String>();
     private Object object;
+    private List<Field> fields;
     
     /**
      * Constructor
@@ -91,6 +91,7 @@ public class Stringify {
      */
     public Stringify(Object object) {
         this.object = object;
+        this.fields = getListOfFields(this.object);
     }
 
     /**
@@ -100,6 +101,9 @@ public class Stringify {
      * @return Stringify object.
      */
     public Stringify exclude(String... names) {
+        if( !this.includedNames.isEmpty() ) {
+            throw new RuntimeException( "Excluded and included names are mutually-exclusive" );
+        }
         for (String name : names) {
             this.excludedNames.add(name.trim());
         }
@@ -113,6 +117,9 @@ public class Stringify {
      * @return Stringify object.
      */
     public Stringify include(String... names) {
+        if( !this.excludedNames.isEmpty() ) {
+            throw new RuntimeException( "Excluded and included names are mutually-exclusive" );
+        }
         for (String name : names) {
             this.includedNames.add(name.trim());
         }
@@ -128,16 +135,7 @@ public class Stringify {
         StringBuilder buf = new StringBuilder();
         buf.append("{");
         try {
-            Class klass = object.getClass();
-            List<Field> fields = new LinkedList<Field>();
-            while (klass != null) {
-                Field[] f = klass.getDeclaredFields();
-                for (int i = 0; i < f.length; ++i) {
-                    fields.add(f[i]);
-                }
-                klass = klass.getSuperclass();
-            }
-            for (Field field : fields) {
+           for (Field field : this.fields) {
                 field.setAccessible(true);
                 Class type = field.getType();
                 String name = field.getName();
@@ -187,4 +185,18 @@ public class Stringify {
         buf.append("}");
         return buf.toString();
     }
+    
+    private static List<Field> getListOfFields(Object object) {
+        Class klass = object.getClass();
+        List<Field> fields = new LinkedList<Field>();
+        while (klass != null) {
+            Field[] f = klass.getDeclaredFields();
+            for (int i = 0; i < f.length; ++i) {
+                fields.add(f[i]);
+            }
+            klass = klass.getSuperclass();
+        }
+        return fields;
+    }
+   
 }
