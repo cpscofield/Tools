@@ -1,5 +1,5 @@
 /**
- * Simple stack implementation; just playing around. :)
+ * Simple stack implementation; just playing around with Scala. :)
  */
 
 package vycegripp
@@ -18,7 +18,7 @@ object Stack {
     println( s.pop )
     if( s.peek() == "2nd String" ) println( "OK!" ); else println( "Not OK!" )
     println( s.pop )
-    if( s.peek() == "A String" )
+    if( s.peek() == "A String" ) println( "OK!" ); else println( "Not OK!" )
     println( s.pop )
     if( s.peek() == null ) println( "OK!" ); else println( "Not OK!" )
 
@@ -30,7 +30,7 @@ object Stack {
     s2.push( 3.14159 )
     s2.push( new java.math.BigInteger( "258000000000000000" ) )
     println( "s2=" + s2 )
-    for( i <- 0 to s2.size()  ) s2.pop
+    for( i <- 0 to s2.size() - 1  ) s2.pop
     if( s2.peek() == null ) println( "OK!" ); else println( "Not OK!" )
     if( s2.size() == 0 ) println( "OK!" ); else println( "Not OK!" )
   }
