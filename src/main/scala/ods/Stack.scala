@@ -21,7 +21,7 @@ class Stack[T] extends Structure[T] {
     else stack.last
   }
   def ==( that : Stack[T] ) : Boolean = {
-    //if( that == null.asInstanceOf[ Stack[T] ] ) return false // causes NPE
+    if( that == null.asInstanceOf[ Any ] ) return false
     if( this.size != that.size ) return false
     for( i <- 0 to this.size-1 ) if( this.stack(i) != that.stack(i) ) return false
     true
