@@ -37,6 +37,7 @@ object StackTest {
     if( s2 == s3 ) println( "OK!" ); else println( "Not OK!" )
     s2.pop()
     if( s2 != s3 ) println( "OK!" ); else println( "Not OK!" )
+    if( s2 != null ) println( "OK!" ); else println( "Not OK!" )
     s2.clear()
     if( s2.peek == null ) println( "OK!" ); else println( "Not OK!" )
     if( s2.size == 0 ) println( "OK!" ); else println( "Not OK!" )

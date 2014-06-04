@@ -3,6 +3,10 @@ package ods
 
 import scala.collection.mutable.ArrayBuffer
 
+object Stack {
+  def apply[T] () = new Stack
+}
+
 /**
  * Simple implementation of a Stack data structure.
  * (Just experimenting with Scala.)
