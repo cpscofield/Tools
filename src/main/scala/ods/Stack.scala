@@ -9,7 +9,8 @@ object Stack {
 
 /**
  * Simple implementation of a Stack data structure.
- * (Just experimenting with Scala.)
+ * (Just experimenting with Scala in full realization that
+ * there is already defined a Stack class in the Scala collection!)
  */
 class Stack[T] extends Structure[T] {
   val stack : ArrayBuffer[T] = new ArrayBuffer[T]()
