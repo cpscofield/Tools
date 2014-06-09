@@ -30,10 +30,23 @@ class ClassFinder {
      * [options]: There are supposed to be 1 or more positional arguments. The first
      * positional argument is always considered to be the classname we are searching
      * for. The optional additional arguments are a list of jar files and/or
-     * directories to be searched. If there is no '-classpath' option and no jar
+     * directories to be searched. If there is no '-classpath' option or no jar
      * files or directories specified, then the program will use the classpath from
      * the Java system property 'java.class.path'.
      * </p>
+     *
+     * <p>
+     *     Example:
+     *     <pre>
+     *       java vycegripp.ClassFinder NameValuePair c:\users\scofield\documents\stash\sandbox\javaex\netbeansprojects\stockgrader
+     *       Searching for class: NameValuePair ...
+     *       Examined 65 files in 0.354 seconds
+     *       The class NameValuePair was found in the following files in the CLASSPATH
+     *           C:\Program Files (x86)\Java\jdk1.7.0_25\jre\lib\rt.jar
+     *       The class NameValuePair was found in the following directory, class, or jar file(s)
+     *           c:\users\scofield\documents\stash\sandbox\javaex\netbeansprojects\stockgrader\build\classes\vycegripp\stockgrader\NameValuePair.class
+     *           c:\users\scofield\documents\stash\sandbox\javaex\netbeansprojects\stockgrader\dist\StockGrader.jar
+     *       </pre>
      *
      * @since 1.5
      * @author carys689 <at> gmail <dot> com
