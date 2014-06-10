@@ -9,7 +9,6 @@ class ClassFinder {
     private String classname = null
     private String unpreprocessed_classname = null
     private boolean trace_search = false
-    private final static boolean DEBUGGING = false
     private long file_count = 0
 
     /**
@@ -30,23 +29,10 @@ class ClassFinder {
      * [options]: There are supposed to be 1 or more positional arguments. The first
      * positional argument is always considered to be the classname we are searching
      * for. The optional additional arguments are a list of jar files and/or
-     * directories to be searched. If there is no '-classpath' option or no jar
+     * directories to be searched. If there is no '-classpath' option and no jar
      * files or directories specified, then the program will use the classpath from
      * the Java system property 'java.class.path'.
      * </p>
-     *
-     * <p>
-     *     Example:
-     *     <pre>
-     *       java vycegripp.ClassFinder NameValuePair c:\users\scofield\documents\stash\sandbox\javaex\netbeansprojects\stockgrader
-     *       Searching for class: NameValuePair ...
-     *       Examined 65 files in 0.354 seconds
-     *       The class NameValuePair was found in the following files in the CLASSPATH
-     *           C:\Program Files (x86)\Java\jdk1.7.0_25\jre\lib\rt.jar
-     *       The class NameValuePair was found in the following directory, class, or jar file(s)
-     *           c:\users\scofield\documents\stash\sandbox\javaex\netbeansprojects\stockgrader\build\classes\vycegripp\stockgrader\NameValuePair.class
-     *           c:\users\scofield\documents\stash\sandbox\javaex\netbeansprojects\stockgrader\dist\StockGrader.jar
-     *       </pre>
      *
      * @since 1.5
      * @author carys689 <at> gmail <dot> com
@@ -84,8 +70,8 @@ class ClassFinder {
             // Do the search(es)
             //
             long start_time = System.currentTimeMillis()
-            String[] jar_list = cf.processClasspath(cf.getClassname(), cf.getClasspath())
-            String[] jar_or_dir_list = cf.processDirsOrJars(cf.getClassname(), newargs, cf.isRecursive())
+            String[] jarList = cf.processClasspath(cf.getClassname(), cf.getClasspath())
+            String[] jarOrDirList = cf.processDirsOrJars(cf.getClassname(), newargs, cf.isRecursive())
             long end_time = System.currentTimeMillis()
             System.out.println("Examined " + cf.getCount() + " files in " + ((float) (end_time - start_time)) / 1000.0 + " seconds")
 
@@ -93,18 +79,18 @@ class ClassFinder {
             // Print the results
             //
             boolean found_something = false
-            if (jar_list != null && jar_list.length > 0) {
+            if (jarList != null && jarList.length > 0) {
                 found_something = true
                 System.out.println("The class " + cf.getUnpreprocessedClassname() + " was found in the following files in the CLASSPATH")
-                for (int i = 0; i < jar_list.length; ++i) {
-                    System.out.println("  " + jar_list[i])
+                for( item in jarList ) {
+                    System.out.println("  " + item)
                 }
             }
-            if (jar_or_dir_list != null && jar_or_dir_list.length > 0) {
+            if (jarOrDirList != null && jarOrDirList.length > 0) {
                 found_something = true
                 System.out.println("The class " + cf.getUnpreprocessedClassname() + " was found in the following directory, class, or jar file(s)")
-                for (int i = 0; i < jar_or_dir_list.length; ++i) {
-                    System.out.println("  " + jar_or_dir_list[i])
+                for( item in jarOrDirList ) {
+                    System.out.println("  " + item)
                 }
             }
             if (!found_something) {
@@ -187,26 +173,26 @@ class ClassFinder {
         boolean classpath_arg_should_be_next = false
         ArrayList dir_or_jar = null // A list of directories or jar files to be searched
         boolean first_arg = true
-        for( int i = 0; i < args.length; ++i ) {
+        for( arg in args ) {
             if (classpath_arg_should_be_next) {
-                this.classpath = new ClassPath(args[i])
+                this.classpath = new ClassPath(arg)
                 classpath_arg_should_be_next = false
-            } else if ("-classpath".equals(args[i]) || "-cp".equals(args[i])) {
+            } else if ("-classpath".equals(arg) || "-cp".equals(arg)) {
                 classpath_arg_should_be_next = true
-            } else if ("-norecurse".equals(args[i])) {
+            } else if ("-norecurse".equals(arg)) {
                 this.traverse_directories_recursively = false
-            } else if ("-trace".equals(args[i])) {
+            } else if ("-trace".equals(arg)) {
                 this.trace_search = true
             } else {
                 if (first_arg) {
-                    this.unpreprocessed_classname = args[i]
+                    this.unpreprocessed_classname = arg
                     this.classname = preprocessClassname(this.unpreprocessed_classname)
                     first_arg = false
                 } else {
                     if (dir_or_jar == null) {
                         dir_or_jar = new ArrayList()
                     }
-                    dir_or_jar.add(args[i])
+                    dir_or_jar.add(arg)
                 }
             }
         }
@@ -254,8 +240,8 @@ class ClassFinder {
         try {
             if (classpath != null) {
                 String[] tempClassPath = this.classpath.toArray()
-                for (int i = 0; i < tempClassPath.length; ++i) {
-                    String component = tempClassPath[i]
+                for( component in tempClassPath ) {
+                    //String component = tempClassPath[i]
                     if (component.endsWith(".jar") || component.endsWith(".war") || component.endsWith(".ear")) {
                         processJarFile(classname, new File(component), list)
                     } else {
@@ -277,22 +263,21 @@ class ClassFinder {
     /**
      * Search for the classname. Search the list of directories and jar files.
      */
-    public String[] processDirsOrJars(String classname, String[] dirs_or_jars, boolean recursive) {
+    public String[] processDirsOrJars(String classname, String[] dirsOrJars, boolean recursive) {
         ArrayList list = new ArrayList()
-        if (dirs_or_jars == null) {
+        if (dirsOrJars == null) {
             return null
         }
-        for (int i = 0; i < dirs_or_jars.length; ++i) {
-            if( DEBUGGING ) System.out.println( "dir_or_jar: " + dirs_or_jars[i] )
-            if (dirs_or_jars[i].endsWith(".jar") || dirs_or_jars[i].endsWith(".war") || dirs_or_jars[i].endsWith(".ear")) {
-                processJarFile(classname, new File(dirs_or_jars[i]), list)
+        for (dirOrJar in dirsOrJars) {
+            if (dirOrJar.endsWith(".jar") || dirOrJar.endsWith(".war") || dirOrJar.endsWith(".ear")) {
+                processJarFile(classname, new File(dirOrJar), list)
             } else {
-                File trythis = new File(dirs_or_jars[i])
+                File trythis = new File(dirOrJar)
                 if (trythis.isDirectory()) {
                     processDirectory(classname, trythis, list, recursive)
                 }
                 else {
-                    System.out.println( "Not a directory?: " + dirs_or_jars[i] )
+                    System.out.println( "Not a directory?: " + dirOrJar )
                 }
             }
         }
@@ -302,8 +287,8 @@ class ClassFinder {
     /**
      * Search for the classname in a single JAR file.
      */
-    public void processJarFile(String classname, File file, ArrayList jar_files) {
-        JarFile jar_file = null
+    public void processJarFile(String classname, File file, ArrayList jarFiles) {
+        JarFile jarFile = null
         if (this.trace_search) {
             System.out.println("Processing JAR file: " + file.getPath())
         }
@@ -312,8 +297,8 @@ class ClassFinder {
                 System.err.println("Warning: JAR file does not exist: " + file)
                 return
             }
-            jar_file = new JarFile(file)
-            Enumeration entries = jar_file.entries()
+            jarFile = new JarFile(file)
+            Enumeration entries = jarFile.entries()
             while (entries.hasMoreElements()) {
                 JarEntry entry = (JarEntry) entries.nextElement()
                 String entry_name = entry.getName()
@@ -322,7 +307,7 @@ class ClassFinder {
                         if (this.trace_search) {
                             System.out.println("Found possible match: " + entry_name + " in " + file.getPath())
                         }
-                        appendToList(jar_files, jar_file.getName())
+                        appendToList(jarFiles, jarFile.getName())
                     }
                 }
             }
@@ -330,9 +315,9 @@ class ClassFinder {
         } catch (IOException e) {
             System.err.println(e + ": " + file.getName())
         } finally {
-            if (jar_file != null) {
+            if (jarFile != null) {
                 try {
-                    jar_file.close()
+                    jarFile.close()
                 } catch (Exception e) {
                 }
             }
@@ -356,13 +341,13 @@ class ClassFinder {
      * @param classname The classname we are searching for. Must be a
      * "preprocessed" classname.
      * @param directory The directory in which to conduct the search.
-     * @param dirs_or_jars The accumulating list of JAR file(s) and/or
+     * @param dirsOrJars The accumulating list of JAR file(s) and/or
      * directories into which we will place the names of JAR files and/or
      * directories where the class was found.
      * @param recursive Indicates whether or not to pursue recursive traversal
      * of any subdirectories found.
      */
-    public void processDirectory(String classname, File directory, ArrayList dirs_or_jars, boolean recursive) {
+    public void processDirectory(String classname, File directory, ArrayList dirsOrJars, boolean recursive) {
         if (this.trace_search) {
             System.out.println("Processing directory: " + directory.getPath())
         }
@@ -370,31 +355,24 @@ class ClassFinder {
         if (files == null) {
             return
         }
-        for (int i = 0; i < files.length; ++i) {
-            if( DEBUGGING ) System.out.println( "Processing file system element: " + files[i] )
-            File file = new File(directory.getPath() + System.getProperty( "file.separator") + files[i])
-            //File file = new File(directory.getPath())
-            if( DEBUGGING ) {
-                if(file.isDirectory() )System.out.println( " ... is a directory" )
-                else System.out.println( " ... is NOT a directory?" )
-            }
+        for (elem in files) {
+            File file = new File(directory.getPath() + System.getProperty( "file.separator") + elem)
 
             if (file.isDirectory() && recursive) {
-                processDirectory(classname, file, dirs_or_jars, recursive)
+                processDirectory(classname, file, dirsOrJars, recursive)
             } else if (file.getName().endsWith(".jar") || file.getName().endsWith(".war") || file.getName().endsWith(".ear")) {
-                if( DEBUGGING ) System.out.println( "About to process JAR file: " + file.getPath() )
-                processJarFile(classname, file, dirs_or_jars)
-            } else if (files[i].endsWith(".class")) {
-                if (files[i].length() != classname.length()) {
+                processJarFile(classname, file, dirsOrJars)
+            } else if (elem.endsWith(".class")) {
+                if (elem.length() != classname.length()) {
                     continue
                 }
                 try {
-                    if (files[i].substring(0, classname.length()).equals(classname)) {
-                        appendToList(dirs_or_jars, file.getPath())
+                    if (elem.substring(0, classname.length()).equals(classname)) {
+                        appendToList(dirsOrJars, file.getPath())
                     }
                 } catch (Exception e) {
                     System.err.println(e)
-                    System.err.println(files[i] + ":" + classname)
+                    System.err.println(elem + ":" + classname)
                     System.err.flush()
                 }
             } else {
