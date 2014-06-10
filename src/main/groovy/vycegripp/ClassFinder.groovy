@@ -1,3 +1,13 @@
+// =============================================================================
+// ClassFinder by Cary Scofield (carys689 <at> gmail <dot> com) is licensed under
+// a Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+// (See http://www.creativecommons.org for details).
+//
+// RECIPIENT ACCEPTS THE GOODS “AS IS,” WITH NO REPRESENTATION OR WARRANTY
+// OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION IMPLIED
+// WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+// =============================================================================
+
 package vycegripp
 
 import java.util.jar.*
