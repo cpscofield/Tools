@@ -251,13 +251,17 @@ class ClassFinder {
             if (classpath != null) {
                 String[] tempClassPath = this.classpath.toArray()
                 for( component in tempClassPath ) {
-                    //String component = tempClassPath[i]
-                    if (component.endsWith(".jar") || component.endsWith(".war") || component.endsWith(".ear")) {
-                        processJarFile(classname, new File(component), list)
-                    } else {
-                        File file = new File(component)
-                        if (file.isDirectory()) {
-                            processDirectory(classname, file, list, false)
+                    if( component.endsWith("*") ) {
+                        processDirectory(classname, dir, "*.jar", list, false )
+                    }
+                    else {
+                        if (component.endsWith(".jar") || component.endsWith(".war") || component.endsWith(".ear")) {
+                            processJarFile(classname, new File(component), list)
+                        } else {
+                            File dir = new File(component)
+                            if (dir.isDirectory()) {
+                                processDirectory(classname, dir, "*", list, false)
+                            }
                         }
                     }
                 }
@@ -284,7 +288,7 @@ class ClassFinder {
             } else {
                 File trythis = new File(dirOrJar)
                 if (trythis.isDirectory()) {
-                    processDirectory(classname, trythis, list, recursive)
+                    processDirectory(classname, trythis, "*", list, recursive)
                 }
                 else {
                     System.out.println( "Not a directory?: " + dirOrJar )
@@ -351,17 +355,29 @@ class ClassFinder {
      * @param classname The classname we are searching for. Must be a
      * "preprocessed" classname.
      * @param directory The directory in which to conduct the search.
+     * @param wildcard
      * @param dirsOrJars The accumulating list of JAR file(s) and/or
      * directories into which we will place the names of JAR files and/or
      * directories where the class was found.
      * @param recursive Indicates whether or not to pursue recursive traversal
      * of any subdirectories found.
      */
-    public void processDirectory(String classname, File directory, ArrayList dirsOrJars, boolean recursive) {
+    public void processDirectory(String classname, File directory, String wildcard, ArrayList dirsOrJars, boolean recursive) {
         if (this.trace_search) {
             System.out.println("Processing directory: " + directory.getPath())
         }
-        String[] files = directory.list()
+
+        String[] files = null
+        if( wildcard == "*" ) {
+            files = directory.list()
+        }
+        else {
+            if( !wildcard.equals( "*.jar") ) {
+                throw new RuntimeException( "Invalid wildcard expression: " + wildcard )
+            }
+            FilenameFilter filter = wildcard
+            files = directory.list(filter)
+        }
         if (files == null) {
             return
         }
@@ -369,7 +385,7 @@ class ClassFinder {
             File file = new File(directory.getPath() + System.getProperty( "file.separator") + elem)
 
             if (file.isDirectory() && recursive) {
-                processDirectory(classname, file, dirsOrJars, recursive)
+                processDirectory(classname, file, "*", dirsOrJars, recursive)
             } else if (file.getName().endsWith(".jar") || file.getName().endsWith(".war") || file.getName().endsWith(".ear")) {
                 processJarFile(classname, file, dirsOrJars)
             } else if (elem.endsWith(".class")) {
