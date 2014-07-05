@@ -151,26 +151,6 @@ class ClassFinder {
     }
 
     /**
-     * For debugging.
-     */
-    private static void dumpStrings(String[] strings) {
-        if (strings != null) {
-            for (int i = 0; i < strings.length; ++i) {
-                System.out.println("strings[" + i + "]=" + strings[i])
-            }
-        } else {
-            System.out.println("strings is null")
-        }
-    }
-
-    /**
-     * For debugging.
-     */
-    private static void dumpStrings(ArrayList strings) {
-        dumpStrings(convertArrayListToStringArray(strings))
-    }
-
-    /**
      * Process command-line arguments and options. There are supposed to be 1 or
      * more positional arguments. The first positional argument is always
      * considered to be the classname we are searching for. The optional
