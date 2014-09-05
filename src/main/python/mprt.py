@@ -32,6 +32,11 @@ Return:
     output its given access ID followed by a list of locations
     in the protein string where the motif can be found.
 
+Author:
+
+    Cary Scofield
+    carys689 <at> gmail <dot> com
+
 """
 
 from urllib import request
