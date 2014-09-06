@@ -1,5 +1,5 @@
 """
-Attempted solution to Rosalind challenge "MPRT: Finding a Protein Motif"
+Solution to Rosalind challenge "MPRT: Finding a Protein Motif"
 See http://rosalind.info/problems/mprt for details.
 
 Attention ROSALIND competitor: if you have not solved this particular
@@ -66,24 +66,25 @@ def join_list(l, sep=''):
     for i in range(len(l)):
         if l[i] != '':
             s += l[i] + sep
-    return s.upper()
+    return s
 
 def get_sequence( fasta ):
     """
     Extract the amino acid sequence from FASTA data as a single string.
     """
     lines = fasta.decode("utf-8").split( '\n')
-    return join_list(lines[1:]) # Ignore FASTA header
+    return join_list(lines[1:]).upper() # Ignore FASTA header
 
 def motif_found( sequence ):
     """
     Does sequence match this pattern: N{P}[ST]{P} 
     """
-    if sequence[0] == 'N':
-        if sequence[1] != 'P':
-            if sequence[2] == 'S' or sequence[2] == 'T':
-                if sequence[3] != 'P':
-                    return True
+    if len(sequence) >= 4:
+        if sequence[0] == 'N':
+            if sequence[1] != 'P':
+                if sequence[2] == 'S' or sequence[2] == 'T':
+                    if sequence[3] != 'P':
+                        return True
     return False
 
 def find_motif_locations( sequence ):
@@ -95,6 +96,7 @@ def find_motif_locations( sequence ):
     for i in range(len(sequence)):
         if motif_found( sequence[i:] ):
             indices.append(str(i + 1)) # 1-based not 0-based!!
+            i += 4 # skip past end of protein motif
     return join_list( indices, sep=' ' )
     
 def execute():
