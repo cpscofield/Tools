@@ -23,45 +23,8 @@ Author:
 
 """
 
-RNA_codon_table = {
-# U
-'UUU': 'F', 'UCU': 'S', 'UAU': 'Y', 'UGU': 'C', # UxU
-'UUC': 'F', 'UCC': 'S', 'UAC': 'Y', 'UGC': 'C', # UxC
-'UUA': 'L', 'UCA': 'S', 'UAA': '-', 'UGA': '-', # UxA
-'UUG': 'L', 'UCG': 'S', 'UAG': '-', 'UGG': 'W', # UxG
-# C
-'CUU': 'L', 'CCU': 'P', 'CAU': 'H', 'CGU': 'R', # CxU
-'CUC': 'L', 'CCC': 'P', 'CAC': 'H', 'CGC': 'R', # CxC
-'CUA': 'L', 'CCA': 'P', 'CAA': 'Q', 'CGA': 'R', # CxA
-'CUG': 'L', 'CCG': 'P', 'CAG': 'Q', 'CGG': 'R', # CxG
-# A
-'AUU': 'I', 'ACU': 'T', 'AAU': 'N', 'AGU': 'S', # AxU
-'AUC': 'I', 'ACC': 'T', 'AAC': 'N', 'AGC': 'S', # AxC
-'AUA': 'I', 'ACA': 'T', 'AAA': 'K', 'AGA': 'R', # AxA
-'AUG': 'M', 'ACG': 'T', 'AAG': 'K', 'AGG': 'R', # AxG
-# G
-'GUU': 'V', 'GCU': 'A', 'GAU': 'D', 'GGU': 'G', # GxU
-'GUC': 'V', 'GCC': 'A', 'GAC': 'D', 'GGC': 'G', # GxC
-'GUA': 'V', 'GCA': 'A', 'GAA': 'E', 'GGA': 'G', # GxA
-'GUG': 'V', 'GCG': 'A', 'GAG': 'E', 'GGG': 'G'  # GxG
-}
+from rna_codon_table import RNA_codon_table
 
-def tally_aa():
-    """
-    Tally the amino acids in RNA_codon_table and
-    return a dictionary of the counts corresponding
-    to each amino acid.
-    """
-    aa_tallies = {}
-    for a in RNA_codon_table.values():
-        try:
-            tally = aa_tallies[a]
-            tally += 1
-            aa_tallies[a] = tally
-        except KeyError:
-            aa_tallies[a] = 1
-    return aa_tallies
-    
 
 def get_sequence( f ):
     """
@@ -78,8 +41,9 @@ def execute():
     datafile = open( "rosalind_mrna.txt", "r")
     sequence = get_sequence( datafile )
     datafile.close()
+    aa_table = RNA_codon_table()
     print( sequence )
-    tallies = tally_aa()
+    tallies = aa_table.get_tallies()
     print(tallies)
     p = 1
     for s in sequence:
