@@ -3,7 +3,7 @@ Solution to Rosalind challenge "ORF: Open Reading Frames"
 See http://rosalind.info/problems/orf for details.
 
 Attention ROSALIND competitor: if you have not solved this particular
-problem yet, it would be unfair to the other competitoris if you
+problem yet, it would be unfair to the other competitors if you
 peruse this code, so please refrain from doing so. Well, okay, you
 can take a "quick peek" if you're really stuck, but don't copy the code.
 
