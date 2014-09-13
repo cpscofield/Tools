@@ -20,24 +20,23 @@ Author:
 """
 
 from fasta import Fasta
+from utils import Utils
 
-def complement( dna ):
-    comp = ''
-    for i in range(len(dna)):
-        if   dna[i] == 'T': comp += 'A'
-        elif dna[i] == 'A': comp += 'T'
-        elif dna[i] == 'C': comp += 'G'
-        elif dna[i] == 'G': comp += 'C'
-    return comp
-
-def reverse( s ):
-    return s[::-1]
+utils = Utils()
 
 def rev_palindrome( dna ):
-    rev = reverse( complement( dna ) )
+    """
+    Check to see if DNA snippet is the same as its reversed complement.
+    """
+    rev = utils.revcomp( dna )
     return dna == rev
 
 def find_restrictions( dna ):
+    """
+    Find restrictions in the DNA by looking for reverse palindromes.
+    Return a list of tuples containing the location and length of
+    the palindromes.
+    """
     restrictions = []
     for i in range(4,13):
         for j in range(len(dna)):
