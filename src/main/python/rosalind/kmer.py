@@ -31,6 +31,8 @@ def readinput( path ):
     return seq
 
 def compare(s1,s2):
+    """
+    """
     for i in range(len(s1)):
         diff = table[s1[i]] - table[s2[i]]
         if diff == 0: continue
@@ -38,12 +40,21 @@ def compare(s1,s2):
     return 0
 
 def build_sort_table(symbols,n):
+    """
+    Build table that dictates lexicographical ordering.
+    """
     return dict((k,s) for s,k in enumerate(symbols))
     
 def sort_it( symbols, n ):
+    """
+    Sort the symbols.
+    """
     return sorted(product(symbols,repeat=n),key=cmp_to_key(compare))
 
 def generate_kmers( sorted_data ):
+    """
+    Generate the k-mers.
+    """
     k_mers = []
     for i in range(len(sorted_data)):
         s = ''
@@ -53,6 +64,9 @@ def generate_kmers( sorted_data ):
     return k_mers
 
 def generate_kmer_composition( sequence, k_mers ):
+    """
+    Generate the K-mer composition of the DNA sequence.
+    """
     comp = ''
     for i in range(len(k_mers )):
         count = 0
