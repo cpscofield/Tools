@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Solution to Rosalind challenge "LEXF: k-Mer Composition"
+Solution to Rosalind challenge "KMER: k-Mer Composition"
 See http://rosalind.info/problems/kmer for details.
 
 Given:
