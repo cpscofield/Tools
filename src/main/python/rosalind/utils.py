@@ -36,7 +36,7 @@ class Utils(object):
             elif rna[i] == 'A': comp += 'U'
             elif rna[i] == 'C': comp += 'G'
             elif rna[i] == 'G': comp += 'C'
-        return compf
+        return comp
 
     def list2string( self, l, sep=' ' ):
         """
