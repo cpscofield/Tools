@@ -21,6 +21,9 @@ Author:
 """
 
 from fasta import Fasta
+from utils import Utils
+
+utils = Utils()
 
 def readinput( path ):
     """
@@ -36,19 +39,20 @@ def find_subsequence( s, t ):
     """
     Find subsequence t in s.
     """
-    sstart = 0
+    snext = 0
     indices = []
     for i in range(len(t)):
-        for j in range(sstart,len(s)):
+        for j in range(snext,len(s)):
             if t[i] == s[j]:
-                indices.append( j+1 )
-                sstart = j + 1
+                indices.append( j+1 ) # 1-based!!
+                snext = j + 1 # start next scan on s on next character
                 break
-    sseq = ''
-    for i in range(len(indices)):
-        if i > 0: sseq += ' '
-        sseq += str(indices[i])
-    return sseq
+    return utils.list2string( indices )
+##    sseq = ''
+##    for i in range(len(indices)):
+##        if i > 0: sseq += ' '
+##        sseq += str(indices[i])
+##    return sseq
 
 def execute():
     (s,t) = readinput( "rosalind_sseq.txt" )
