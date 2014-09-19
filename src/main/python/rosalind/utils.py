@@ -36,7 +36,18 @@ class Utils(object):
             elif rna[i] == 'A': comp += 'U'
             elif rna[i] == 'C': comp += 'G'
             elif rna[i] == 'G': comp += 'C'
-        return comp
+        return compf
+
+    def list2string( self, l, sep=' ' ):
+        """
+        Convert a list to a string.
+        """
+        s = ''
+        for i in range(len(l)):
+            if i>0: s += sep
+            s += str(l[i])
+        return s
+    
 
     def reverse( self, seq ):
         """
