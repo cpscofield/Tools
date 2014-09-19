@@ -48,11 +48,6 @@ def find_subsequence( s, t ):
                 snext = j + 1 # start next scan on s on next character
                 break
     return utils.list2string( indices )
-##    sseq = ''
-##    for i in range(len(indices)):
-##        if i > 0: sseq += ' '
-##        sseq += str(indices[i])
-##    return sseq
 
 def execute():
     (s,t) = readinput( "rosalind_sseq.txt" )
