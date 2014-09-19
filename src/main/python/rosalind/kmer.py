@@ -32,6 +32,8 @@ def readinput( path ):
 
 def compare(s1,s2):
     """
+    Compare the two strings according to the dictates of
+    the specified lexicographical ordering.
     """
     for i in range(len(s1)):
         diff = table[s1[i]] - table[s2[i]]
@@ -39,7 +41,7 @@ def compare(s1,s2):
         return diff
     return 0
 
-def build_sort_table(symbols,n):
+def build_sort_table(symbols):
     """
     Build table that dictates lexicographical ordering.
     """
@@ -71,7 +73,7 @@ def generate_kmer_composition( sequence, k_mers ):
     for i in range(len(k_mers )):
         count = 0
         for j in range(len(sequence)):
-            if k_mers[i] == sequence[j:j+4]:
+            if k_mers[i] == sequence[j:j+N]:
                 count += 1
         if i > 0: comp += ' '
         comp += str(count)
@@ -81,7 +83,7 @@ def execute():
     sequence = readinput("rosalind_kmer.txt")
     global table
     symbols = 'ACGT'
-    table = build_sort_table(symbols, N)
+    table = build_sort_table(symbols)
     sorted_data = sort_it(symbols,N)
     k_mers = generate_kmers( sorted_data )
     print( generate_kmer_composition( sequence, k_mers ) )    
