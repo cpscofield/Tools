@@ -53,8 +53,10 @@ def find_clumps( genome, k, L, t ):
     """
     Get all the k-mers from the genome.
     """
-
-    kmers = get_kmers( genome[0:L], k )
+    # Seed the k-mer list by scanning the 1st L nucleotides
+    kmers = get_kmers( genome[0:L], k ) 
+    # Extend the k-mer list by looking for them in a sliding window that's
+    # L-nucleotides wide.
     for i in range(1,len(genome)):
         if L+i >= len(genome): break
         kmers.extend( get_kmers( genome[L-k+i:L+i], k ) )
