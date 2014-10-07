@@ -50,6 +50,7 @@ object Fib {
     execute()
     val end = (System.currentTimeMillis() - start)/1000.0D
     println( f"Total time=$end%.3f second(s)" )
+
   }
 
 }
