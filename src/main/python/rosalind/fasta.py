@@ -4,6 +4,9 @@ not parse the FASTA header except to get whatever is in the header as a single
 string. Other than that we, of course, get all the genomic sequence data that
 is included in each and every FASTA 'segment' and collapse it into a single
 contiguous string.
+
+Author: Cary Scofield, carys689 <at> gmail <dot> com
+
 """
 class Fasta(object):
     def __init__(self, path):
@@ -77,7 +80,11 @@ class FastaHeader(object):
         """
         Constructor.
         """
-        self._name = header # for now just a string containing a name
+        if '|' in header:
+            """ TODO: Need to parse header components. """
+            self._name = header # for now just copy all the components into name
+        else:
+            self._name = header # for now just a string containing a name
 
     def get_name(self):
         """
