@@ -39,10 +39,11 @@ def zero_counts( size ):
 
 def calculate_consensus( fasta ):
     n_columns = len(fasta.get_segments()[0].get_sequence())
-    a_counts = zero_counts( n_columns )
-    c_counts = zero_counts( n_columns )
-    g_counts = zero_counts( n_columns )
-    t_counts = zero_counts( n_columns )
+    zeros = zero_counts( n_columns )
+    a_counts = zeros[:]
+    c_counts = zeros[:]
+    g_counts = zeros[:]
+    t_counts = zeros[:]
     for i in range( len( fasta.get_segments() ) ):
         seg = fasta.get_segments()[i]
         seq = seg.get_sequence().upper()
