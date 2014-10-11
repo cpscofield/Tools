@@ -24,6 +24,9 @@ from time import clock
 from fasta import Fasta
 
 def readinput( path ):
+    """
+    Read all the segments from FASTA file. Return Fasta object.
+    """
     fasta = Fasta( path )
     for i in range( len(fasta.get_segments()) ):
         seg = fasta.get_segments()[i]
@@ -31,15 +34,25 @@ def readinput( path ):
         print( seg.get_header() + "\n" + seq )
     return fasta
 
-def zero_counts( size ):
+def make_zeros( size ):
+    """
+    Make a list of zeros.
+    """
     counts = []
     for i in range(size):
         counts.append( 0 )
     return counts
 
 def calculate_consensus( fasta ):
+    """
+    For each of the sequences in each of the FASTA segments, count the
+    number of A,C,G,T nucleotides in each column. The length of sequences
+    are required to be of equal length. Once the tallies have been
+    completed, create a consensus genome of the highest tally of each
+    column from the input genomes.
+    """
     n_columns = len(fasta.get_segments()[0].get_sequence())
-    zeros = zero_counts( n_columns )
+    zeros = make_zeros( n_columns )
     a_counts = zeros[:]
     c_counts = zeros[:]
     g_counts = zeros[:]
