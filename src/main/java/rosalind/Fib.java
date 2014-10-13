@@ -48,23 +48,23 @@ public class Fib {
         }
     }
 
-    private static class Tuple2 {
-        public int n;
-        public int k;
+    private static class Tuple2<T,U> {
+        public T n;
+        public U k;
     }
 
     private static void execute() throws Exception {
-        Tuple2 params = readinput("c:/downloads/rosalind_fib.txt");
+        Tuple2<Long,Long> params = readinput("c:/downloads/rosalind_fib.txt");
         System.out.println("n=" + params.n + " k=" + params.k);
         System.out.println(fib(params.n, params.k));
     }
 
-    private static Tuple2 readinput(String path) throws Exception {
-        Tuple2 params = new Tuple2();
+    private static Tuple2<Long,Long> readinput(String path) throws Exception {
+        Tuple2<Long,Long> params = new Tuple2<>();
         File file = new File(path);
         try (Scanner scanner = new Scanner(file)) {
-            params.n = scanner.nextInt();
-            params.k = scanner.nextInt();
+            params.n = scanner.nextLong();
+            params.k = scanner.nextLong();
         }
         return params;
     }
