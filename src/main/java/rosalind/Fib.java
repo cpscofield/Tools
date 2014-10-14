@@ -48,7 +48,7 @@ public class Fib {
         }
     }
 
-    private static class Tuple2<T,U> {
+    private static class Tuple2<T extends Number,U extends Number> {
         public T n;
         public U k;
     }
