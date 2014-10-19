@@ -34,15 +34,6 @@ def readinput( path ):
         print( seg.get_header() + "\n" + seq )
     return fasta
 
-def make_zeros( size ):
-    """
-    Make a list of zeros.
-    """
-    counts = []
-    for i in range(size):
-        counts.append( 0 )
-    return counts
-
 def calculate_consensus( fasta ):
     """
     For each of the sequences in each of the FASTA segments, count the
@@ -52,7 +43,7 @@ def calculate_consensus( fasta ):
     column from the input genomes.
     """
     n_columns = len(fasta.get_segments()[0].get_sequence())
-    zeros = make_zeros( n_columns )
+    zeros = [0] * n_columns
     a_counts = zeros[:]
     c_counts = zeros[:]
     g_counts = zeros[:]
