@@ -119,7 +119,7 @@ class RNA_codon_table(object):
         try:
             code = self._table[aa_triplet]
         except KeyError as e:
-            code = 'No code for this amino acid: ' + aa_triplet + ": " + e
+            code = 'No code for this amino acid: ' + aa_triplet + ": " + str(e)
 
         return code
 
