@@ -35,7 +35,7 @@ class RNA_codon_table(object):
             'D' : ['GAU', 'GAC'],
             'E' : ['GAA', 'GAG'],
             'F' : ['UUU', 'UUC'],
-            'G' : ['GGU', 'GGC', 'GGA', 'GGG']
+            'G' : ['GGU', 'GGC', 'GGA', 'GGG'],
             'H' : ['CAU', 'CAC'],
             'I' : ['AUU', 'AUC', 'AUA'],
             'K' : ['AAA', 'AAG'],
@@ -59,7 +59,7 @@ class RNA_codon_table(object):
             'D' : ['Asp','Aspartic acid'],
             'E' : ['Glu','Glutamic acid'],
             'F' : ['Phe','Phenylatlanine'],
-            'G' : ['Gly','Glycine']
+            'G' : ['Gly','Glycine'],
             'H' : ['His','Histidine'],
             'I' : ['Ile','Isoleucine'],
             'K' : ['Lys','Lysine'],
