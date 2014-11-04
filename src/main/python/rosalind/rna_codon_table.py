@@ -25,7 +25,7 @@ class RNA_codon_table(object):
             'GUU': 'V', 'GCU': 'A', 'GAU': 'D', 'GGU': 'G', # GxU
             'GUC': 'V', 'GCC': 'A', 'GAC': 'D', 'GGC': 'G', # GxC
             'GUA': 'V', 'GCA': 'A', 'GAA': 'E', 'GGA': 'G', # GxA
-            'GUG': 'V', 'GCG': 'A', 'GAG': 'E', 'GGG': 'G'  # GxG
+            'GUG': 'V', 'GCG': 'A', 'GAG': 'E', 'GGG': 'G',  # GxG
             }
         
         self._inverted_table = {
@@ -96,7 +96,7 @@ class RNA_codon_table(object):
             'T':   101.04768,
             'V':   99.06841,
             'W':   186.07931,
-            'Y':   163.06333
+            'Y':   163.06333,
             }
         
         self._tallies = None
