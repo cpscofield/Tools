@@ -17,9 +17,15 @@ class Stack[T] extends Structure[T] {
   def push( elem: T ) {
     stack += elem
   }
+  def ++( elem: T ) {
+    push( elem )
+  }
   def pop() : T = {
     if( stack.isEmpty ) null.asInstanceOf[T]
     else stack.remove( stack.length - 1 )
+  }
+  def --() : T = {
+    pop()
   }
   def peek : T = {
     if( stack.isEmpty ) null.asInstanceOf[T]

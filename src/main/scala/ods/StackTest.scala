@@ -16,19 +16,25 @@ object StackTest {
 
   def main(args: Array[String]): Unit = {
 
+    //
+    // Create a stack of strings and then pop them off one by one.
+    //
     var s = new Stack[String]
     s.push( "A String" )
     s.push( "2nd String" )
-    s.push( "Another String" )
+    s ++ "Another String"
     println( "s=" + s )
     assertTrue( s.peek == "Another String",  """s.peek not equal to "Another String" """ )
     println( s.pop )
     assertTrue( s.peek == "2nd String", """s.peek not equal to "2nd String" """ )
     println( s.pop )
     assertTrue( s.peek == "A String", """s.peek not equal to "A String" """ )
-    println( s.pop )
+    println( s -- )
     assertTrue( s.peek == null, """s.peek not equal to null""" )
 
+    //
+    // Create a stack of Any objects and test various Stack operations.
+    //
     var s2 = new Stack[Any]
     s2.push( List(1,1,2,3,5,8))
     assertTrue( s2.peek == List(1,1,2,3,5,8) )
