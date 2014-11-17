@@ -51,7 +51,9 @@ class RNA_codon_table(object):
             'W' : ['UGG'],
             'Y' : ['UAU', 'UAC'],
             }
-            
+
+        self._codes = ['A','C','D','E','F','G','H','I','K','L','M','N','P','Q','R','S','T','V','W','Y']
+        
         self._name_table = {
             '-' : ['STP','STOP'],
             'A' : ['Ala','Alanine'],
@@ -98,6 +100,50 @@ class RNA_codon_table(object):
             'W':   186.07931,
             'Y':   163.06333,
             }
+
+        self._integer_daltons = {
+            'A':   71,
+            'C':   103,
+            'D':   115,
+            'E':   129,
+            'F':   147,
+            'G':   57,
+            'H':   137,
+            'I':   113,
+            'K':   128,
+            'L':   113,
+            'M':   131,
+            'N':   114,
+            'P':   97,
+            'Q':   128,
+            'R':   156,
+            'S':   87,
+            'T':   101,
+            'V':   99,
+            'W':   186,
+            'Y':   163,
+            }
+
+        self._inverted_integer_daltons = {
+            71:   ['A'],
+            103:  ['C'],
+            115:  ['D'],
+            129:  ['E'],
+            147:  ['F'],
+            57:   ['G'],
+            137:  ['H'],
+            113:  ['I','L'],
+            128:  ['K','Q'],
+            131:  ['M'],
+            114:  ['N'],
+            97:   ['P'],
+            156:  ['R'],
+            87:   ['S'],
+            101:  ['T'],
+            99:   ['V'],
+            186:  ['W'],
+            163:  ['Y'],
+            }
         
         self._tallies = None
         
@@ -130,6 +176,12 @@ class RNA_codon_table(object):
         codons = self._inverted_table[code]
         return codons
 
+    def get_all_codes(self):
+        """
+        Return list of single-letter codes for all amino acids.
+        """
+        return self._names
+
     def get_abbrev(self, code ):
         """
         Return abbreviated name for single-letter code.
@@ -143,12 +195,46 @@ class RNA_codon_table(object):
         return _name_table[code][1]
 
     def get_mass( self, code ):
+        """
+        Given a code, return its mass.
+        """
         mass = float(0)
         try:
             mass = self._daltons[ code.upper() ]
         except KeyError as e:
             print( str(e) + ": " + code )
         return mass
+
+    def get_integer_mass( self, code ):
+        """
+        Given a code, return its integer mass.
+        """
+        return round( self.get_mass( code ) )
+
+    def get_inverted_integer_mass( self, mass ):
+        """
+        Given an integer mass, return the code(s) associated with it.
+        """
+        return self._inverted_integer_daltons[mass]
+
+    def get_all_masses( self ):
+        """
+        Return the masses for all the codes.
+        """
+        return self._daltons.items()
+
+    def get_all_integer_masses( self ):
+        """
+        Return the integer masses for all the codes.
+        """
+        return self._integer_daltons.items()
+        pass
+
+    def get_all_inverted_integer_masses( self ):
+        """
+        
+        """
+        return self._inverted_integer_daltons
     
     def get_tallies(self):
         """
@@ -195,6 +281,21 @@ def run_tests():
     ANSWER = float(330.13618)
     EPSILON = float(0.000001)
     assert fabs(mass-ANSWER) < EPSILON, "Wrong answer: " + mass
+
+    mass = 0
+    mass += table.get_integer_mass( 'A' )
+    mass += table.get_integer_mass( 'm' )
+    mass += table.get_integer_mass( 'Q' )
+    ANSWER = 330
+    assert mass == ANSWER, "Wrong integer answer: " + mass
+
+    print( "Float masses:" )
+    print( ' '.join(map(str,table.get_all_masses())))
+    print( "Integer masses:" )
+    print( ' '.join(map(str,table.get_all_integer_masses())))
+    print( "Inverted integer masses:" )
+    print( ' '.join(map(str,table.get_all_inverted_integer_masses())))
+    
     print( "Tests completed." )
     
 
