@@ -25,6 +25,8 @@ import scala.util.Random
 
 object ReverseBenchmark {
 
+  def builtinReverse[A](ls: List[A]): List[A] = ls.reverse
+
   // Simple recursive.  O(n^2)
   def reverseRecursive[A](ls: List[A]): List[A] = ls match {
     case Nil       => Nil
@@ -44,27 +46,21 @@ object ReverseBenchmark {
   def reverseFunctional[A](ls: List[A]): List[A] =
     ls.foldLeft(List[A]()) { (r, h) => h :: r }
 
-  def benchmark[A]( title : String, f: List[A] => List[A], list:List[A]  ) : Unit = {
+  def benchmark[A]( title : String, f: List[A] => List[A], ls:List[A]  ) : Unit = {
     val startTime = System.currentTimeMillis()
-    f(list)
+    f(ls)
     println ( title + ": " + ( System.currentTimeMillis() - startTime ) + " milliseconds" )
   }
 
   def main(args: Array[String]): Unit = {
     val numIntegers: Int = 1000
-    var startTime : Long = 0
-    var endTime : Long = 0
     val numbers : List[Int] = List.fill(numIntegers)(Random.nextInt).sorted
 
     numbers.reverse // do this only to 'prime' the cache before the actual benchmarking
 
     println( "Benchmarking the list reversal of " + numIntegers + " items" )
     println( "======================================================" )
-
-    startTime = System.currentTimeMillis()
-    numbers.reverse
-    println( "Built-in reverse: " + ( System.currentTimeMillis() - startTime ) + " milliseconds" )
-
+    benchmark[Int]( "Built-in reverse", builtinReverse[Int], numbers )
     benchmark[Int]( "Recursive reverse", reverseRecursive[Int], numbers )
     benchmark[Int]( "Tail recursive reverse", reverseTailRecursive[Int], numbers )
     benchmark[Int]( "Functional reverse", reverseFunctional[Int], numbers )
