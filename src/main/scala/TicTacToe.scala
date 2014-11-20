@@ -2,16 +2,17 @@ import scala.util.control.Breaks._
 import scala.util.Random
 
 /**
- * Tic-Tac-Toe game pitting the computer against itself. Player 'X' always goes first with
- * a randomly selected move. The players 'O' and 'X' alternate moves using alpha-beta pruning
- * to select each move. Statistics show that the player making the first move wins more
- * games than the other player with both players using the same strategy.
+ * This is Tic-Tac-Toe game pitting the computer against itself. Player 'X' always goes first with
+ * a randomly selected move. The players 'O' and 'X' then alternate moves using alpha-beta pruning
+ * to select responding move. Statistics consistently show that from running the simulation
+ * the player making the first move wins more games than the other player with both
+ * players using the same strategy.
  *
  * @author Cary Scofield carys689 <at> gmail <dot> com
  * @version 2.11.2
  *
- * Note: To give credit where credit is due, this program uses Java minimax code (for alpha-beta
- * pruning) transcribed/adapted to Scala from https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
+ * Note: To give credit where credit is due, this program uses Java code (for alpha-beta pruning logic)
+ * transcribed/adapted to Scala from https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
  */
 object TicTacToe {
   val GRID = Array.ofDim[Char](3,3)
@@ -335,7 +336,7 @@ object TicTacToe {
     var Xtally : Int = 0
     var Otally : Int = 0
     var ties   : Int = 0
-    var GAMES  : Int = 100
+    val GAMES  : Int = 100
 
     val startTime = System.currentTimeMillis()
     for( i <- 1 to GAMES ) {
