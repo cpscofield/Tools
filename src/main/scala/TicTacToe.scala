@@ -6,7 +6,20 @@ import scala.util.Random
  * a randomly selected move. The players 'O' and 'X' then alternate moves using alpha-beta pruning
  * to select responding move. Statistics consistently show that from running the simulation
  * the player making the first move wins more games than the other player with both
- * players using the same strategy.
+ * players using the same counter-move strategy.
+ *
+ * <p>
+ * Running a simulation of 100 games on a dual-core, 2.7 GHz Windows 7 machine produces
+ * results similar to the following:
+ *
+ * <pre>
+ * 100 games played:
+ * 	Number of times Player X won: 30
+ * 	Number of times Player O won: 26
+ * 	Number of ties:               44
+ *
+ * Total run time: 0.292 second(s)
+ * </pre>
  *
  * @author Cary Scofield carys689 <at> gmail <dot> com
  * @version 2.11.2
@@ -28,7 +41,7 @@ object TicTacToe {
    * @return
    */
   def initGrid(): Unit = {
-    for( i <- 0 to 2 ) for( j <- 0 to 2 ) GRID(i)(j) = EMPTY
+    for( r <- 0 to 2 ) for( c <- 0 to 2 ) GRID(r)(c) = EMPTY
   }
 
   /**
@@ -38,7 +51,7 @@ object TicTacToe {
    */
   def deepCopyGrid( grid : Array[Array[Char]]) : Array[Array[Char]] = {
     val newGrid : Array[Array[Char]] = Array.ofDim[Char](3,3)
-    for( i <- 0 to 2) for( j <- 0 to 2 ) newGrid(i)(j) = grid(i)(j)
+    for( r <- 0 to 2) for( c <- 0 to 2 ) newGrid(r)(c) = grid(r)(c)
     newGrid
   }
 
@@ -50,11 +63,11 @@ object TicTacToe {
    */
   def isWinner( grid: Array[Array[Char]], player : Char ) : Boolean = {
     def checkRows() : Boolean = {
-      for( i <- 0 to 2 ) if( grid(i)(0) == player && grid(i)(1) == player && grid(i)(2) == player ) return true
+      for( r <- 0 to 2 ) if( grid(r)(0) == player && grid(r)(1) == player && grid(r)(2) == player ) return true
       false
     }
     def checkColumns() : Boolean = {
-      for( i <- 0 to 2 ) if( grid(0)(i) == player && grid(1)(i) == player && grid(2)(i) == player ) return true
+      for( c <- 0 to 2 ) if( grid(0)(c) == player && grid(1)(c) == player && grid(2)(c) == player ) return true
       false
     }
     def checkDiagonals() : Boolean = {
@@ -72,22 +85,22 @@ object TicTacToe {
    */
   def showGrid( grid: Array[Array[Char]]): String = {
     val buf : StringBuilder = new StringBuilder(64)
-    for( i <- 0 to 2 ) {
-      for( j <- 0 to 2 ) {
-        buf.append( grid(i)(j) )
-        if( j < 2 ) buf.append( " | " )
+    for( r <- 0 to 2 ) {
+      for( c <- 0 to 2 ) {
+        buf.append( grid(r)(c) )
+        if( c < 2 ) buf.append( " | " )
       }
       buf.append( '\n' )
-      if( i < 2 ) buf.append( "---------\n" )
+      if( r < 2 ) buf.append( "---------\n" )
     }
     buf.append( '\n' )
     buf.toString
   }
 
   /**
-   * Print list of cells. Used for debugging.
-   * @param ls
-   * @return
+   * Make a list of cells as a String. Used for debugging.
+   * @param ls The list of available cells.
+   * @return String representation of available cell list.
    */
   def showAvailableCells( ls: List[ (Int,Int) ] ) : String = {
     val buf: StringBuilder = new StringBuilder()
@@ -113,8 +126,8 @@ object TicTacToe {
   def availableCells(grid: Array[Array[Char]]) : List[ (Int,Int) ] = {
     var cells : List[ (Int,Int) ] = Nil.asInstanceOf[List[(Int,Int)]]
     if (isWinner(grid,mySeed) || isWinner(grid,oppSeed) ) return cells
-    for( i <- 0 to 2 ) for( j <- 0 to 2 ) {
-      if (isEmptyCell(grid, i, j)) cells = cells :+ (i, j)
+    for( r <- 0 to 2 ) for( c <- 0 to 2 ) {
+      if (isEmptyCell(grid, r, c)) cells = cells :+ (r, c)
     }
     cells
   }
@@ -211,7 +224,7 @@ object TicTacToe {
   }
 
   /**
-   * Select a random cell. To be used only at the start. Not valid after this move has been made.
+   * Select a random cell. To be used only at the start of each game. Not valid after this move has been made.
    * @return row and col as a Tuple2
    */
   def randomMove() : (Int,Int) = {
@@ -230,7 +243,7 @@ object TicTacToe {
 
   /** Minimax (recursive) at level of depth for maximizing or minimizing player
        with alpha-beta cut-off.
-       Returns tuple of (score, row, col)
+       @return score, row, and col as a Tuple3
       Method adapted from: https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
     */
   def minimax(grid: Array[Array[Char]], depth : Int, player : Char, alpha : Int, beta: Int) : (Int,Int,Int) = {
@@ -336,13 +349,13 @@ object TicTacToe {
     var Xtally : Int = 0
     var Otally : Int = 0
     var ties   : Int = 0
-    val GAMES  : Int = 100
+    val GAMES  : Int = 100 // Should be a command-line option
 
     val startTime = System.currentTimeMillis()
     for( i <- 1 to GAMES ) {
-      val result = playGame()
-      if( result == X ) Xtally += 1
-      else if( result == O ) Otally += 1
+      val winner = playGame()
+      if( winner == X ) Xtally += 1
+      else if( winner == O ) Otally += 1
       else ties += 1
     }
     val endTime = System.currentTimeMillis()
