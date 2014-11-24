@@ -28,13 +28,15 @@ import scala.util.Random
  * transcribed/adapted to Scala from https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
  */
 object TicTacToe {
-  val GRID = Array.ofDim[Char](3,3)
+  type GridType = Array[Array[Char]]
+  val GRID : GridType = Array.ofDim[Char](3,3)
   val X : Char = 'X'
   val O : Char = 'O'
+  val TIE : Char = '-'
   val EMPTY : Char = ' '
 
-  var mySeed : Char = X
-  var oppSeed : Char = O
+  val mySeed : Char = X
+  val oppSeed : Char = O
 
   /**
    * Initialize the grid to all empty cells.
@@ -49,8 +51,8 @@ object TicTacToe {
    * @param grid
    * @return
    */
-  def deepCopyGrid( grid : Array[Array[Char]]) : Array[Array[Char]] = {
-    val newGrid : Array[Array[Char]] = Array.ofDim[Char](3,3)
+  def deepCopyGrid( grid : GridType) : GridType = {
+    val newGrid : GridType = Array.ofDim[Char](3,3)
     for( r <- 0 to 2) for( c <- 0 to 2 ) newGrid(r)(c) = grid(r)(c)
     newGrid
   }
@@ -61,7 +63,7 @@ object TicTacToe {
    * @param player
    * @return
    */
-  def isWinner( grid: Array[Array[Char]], player : Char ) : Boolean = {
+  def isWinner( grid: GridType, player : Char ) : Boolean = {
     def checkRows() : Boolean = {
       for( r <- 0 to 2 ) if( grid(r)(0) == player && grid(r)(1) == player && grid(r)(2) == player ) return true
       false
@@ -83,7 +85,7 @@ object TicTacToe {
    * @param grid
    * @return
    */
-  def showGrid( grid: Array[Array[Char]]): String = {
+  def showGrid( grid: GridType): String = {
     val buf : StringBuilder = new StringBuilder(64)
     for( r <- 0 to 2 ) {
       for( c <- 0 to 2 ) {
@@ -116,14 +118,14 @@ object TicTacToe {
     buf.toString
   }
 
-  def isEmptyCell( grid: Array[Array[Char]], row : Int, col : Int ) : Boolean = grid(row)(col) == EMPTY
+  def isEmptyCell( grid: GridType, row : Int, col : Int ) : Boolean = grid(row)(col) == EMPTY
 
   /**
    * Produce a list of available cells for making the next move to.
    * @param grid The Tic-Tac-Toe grid
    * @return
    */
-  def availableCells(grid: Array[Array[Char]]) : List[ (Int,Int) ] = {
+  def availableCells(grid: GridType) : List[ (Int,Int) ] = {
     var cells : List[ (Int,Int) ] = Nil.asInstanceOf[List[(Int,Int)]]
     if (isWinner(grid,mySeed) || isWinner(grid,oppSeed) ) return cells
     for( r <- 0 to 2 ) for( c <- 0 to 2 ) {
@@ -133,16 +135,20 @@ object TicTacToe {
   }
 
   /**
-   * Make a cell in the grid
+   * Mark a cell in the grid
    * @param grid The Tic-Tac-Toe grid
    * @param player Either Player 'X' or Player 'O'
    * @param row Which row to mark
    * @param col Whick column to mark
    * @return Content of cell
    */
-  def markCell( grid: Array[Array[Char]], player : Char, row : Int, col : Int ) : Char = {
+  def markCell( grid: GridType, player : Char, row : Int, col : Int ) : Char = {
     if( isEmptyCell(grid, row, col) ) grid(row)(col) = player
     grid(row)(col)
+  }
+
+  def markCell( grid: GridType, player : Char, rowcol: (Int,Int) ) : Char = {
+    markCell( grid, player, rowcol._1, rowcol._2 )
   }
 
     /** The heuristic evaluation function for the current board
@@ -151,7 +157,7 @@ object TicTacToe {
                0 otherwise
       Method adapted from: https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
     */
-  def evaluate( grid: Array[Array[Char]]) : Int = {
+  def evaluate( grid: GridType) : Int = {
     var score : Int = 0
     // Evaluate score for each of the 8 lines (3 rows, 3 columns, 2 diagonals)
     score += evaluateLine(grid, 0, 0, 0, 1, 0, 2)  // row 0
@@ -170,7 +176,7 @@ object TicTacToe {
                0 otherwise
       Method adapted from: https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
     */
- def evaluateLine(grid : Array[Array[Char]],
+ def evaluateLine(grid : GridType,
                   row1 : Int, col1 : Int,
                   row2 : Int, col2 : Int,
                   row3 : Int, col3 : Int ) : Int  = {
@@ -234,7 +240,7 @@ object TicTacToe {
     (row,col)
   }
 
-  def move( grid: Array[Array[Char]], player : Char) : (Int,Int) = {
+  def move( grid: GridType, player : Char) : (Int,Int) = {
     val move_ : (Int,Int,Int) = minimax(grid,2, player, Integer.MIN_VALUE, Integer.MAX_VALUE)
     // depth, max-turn, alpha, beta
     showGrid( grid )
@@ -246,7 +252,7 @@ object TicTacToe {
        @return score, row, and col as a Tuple3
       Method adapted from: https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
     */
-  def minimax(grid: Array[Array[Char]], depth : Int, player : Char, alpha : Int, beta: Int) : (Int,Int,Int) = {
+  def minimax(grid: GridType, depth : Int, player : Char, alpha : Int, beta: Int) : (Int,Int,Int) = {
     // Generate possible next moves in a list of int[2] of {row, col}.
     val nextMoves : List[(Int,Int)] = availableCells( grid )
     // mySeed is maximizing while oppSeed is minimizing
@@ -302,21 +308,23 @@ object TicTacToe {
     }
   }
 
+  def isGameOver( rowcol : (Int,Int) ) : Boolean = rowcol._1 == -1 && rowcol._2 == -1;
+
   /**
-   * Play one game. Return the name of the winner if it's 'X' or 'O' otherwise return '-' if there was a tie.
+   * Play one game. Return the name of the winner if it's 'X' or 'O' otherwise return TIE if there was a tie.
    * @return
    */
   def playGame() : Char = {
     initGrid()
-    var initialMove : (Int,Int) = randomMove()
+    val initialMove : (Int,Int) = randomMove()
     markCell( GRID, X, initialMove._1, initialMove._2 )
     println( "Player " + X + " marks cell (" + initialMove._1 + "," + initialMove._2 + ")" )
     println( showGrid(GRID))
     breakable {
       for( i <- 1 to 50) {
-        val player : Char = if (i % 2 == 0) X else O
+        val player : Char = if( i % 2 == 0 ) X else O
         val rowcol: (Int, Int) = move(GRID, player)
-        if (rowcol._1 == -1 && rowcol._2 == -1) break // game over
+        if (isGameOver( rowcol )) break
         println( "Player " + player + " marks cell (" + rowcol._1 + "," + rowcol._2 + ")" )
         markCell(GRID, player, rowcol._1, rowcol._2)
         println(showGrid(GRID) )
@@ -333,7 +341,7 @@ object TicTacToe {
     }
     else {
       println( "Cat's got it" )
-      return '-'
+      return TIE
     }
   }
 
