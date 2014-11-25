@@ -28,14 +28,17 @@ import scala.util.Random
  * transcribed/adapted to Scala from https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
  */
 object TicTacToe {
-  type GridType = Array[Array[Char]]
-  val GRID : GridType = Array.ofDim[Char](3,3)
-  val X : Char = 'X'
-  val O : Char = 'O'
-  val TIE : Char = '-'
-  val EMPTY : Char = ' '
 
-  val mySeed : Char = X
+  type Grid   = Array[Array[Char]]
+  type RowCol = (Int,Int)
+  val GRID : Grid = Array.ofDim[Char](3,3)
+
+  val X : Char      = 'X'
+  val O : Char      = 'O'
+  val TIE : Char    = '-'
+  val EMPTY : Char  = ' '
+
+  val mySeed : Char  = X
   val oppSeed : Char = O
 
   /**
@@ -51,8 +54,8 @@ object TicTacToe {
    * @param grid
    * @return
    */
-  def deepCopyGrid( grid : GridType) : GridType = {
-    val newGrid : GridType = Array.ofDim[Char](3,3)
+  def deepCopyGrid( grid : Grid) : Grid = {
+    val newGrid : Grid = Array.ofDim[Char](3,3)
     for( r <- 0 to 2) for( c <- 0 to 2 ) newGrid(r)(c) = grid(r)(c)
     newGrid
   }
@@ -63,7 +66,7 @@ object TicTacToe {
    * @param player
    * @return
    */
-  def isWinner( grid: GridType, player : Char ) : Boolean = {
+  def isWinner( grid: Grid, player : Char ) : Boolean = {
     def checkRows() : Boolean = {
       for( r <- 0 to 2 ) if( grid(r)(0) == player && grid(r)(1) == player && grid(r)(2) == player ) return true
       false
@@ -85,7 +88,7 @@ object TicTacToe {
    * @param grid
    * @return
    */
-  def showGrid( grid: GridType): String = {
+  def showGrid( grid: Grid): String = {
     val buf : StringBuilder = new StringBuilder(64)
     for( r <- 0 to 2 ) {
       for( c <- 0 to 2 ) {
@@ -104,7 +107,7 @@ object TicTacToe {
    * @param ls The list of available cells.
    * @return String representation of available cell list.
    */
-  def showAvailableCells( ls: List[ (Int,Int) ] ) : String = {
+  def showAvailableCells( ls: List[ RowCol ] ) : String = {
     val buf: StringBuilder = new StringBuilder()
     def buildString( buf : StringBuilder, ls : List[ (Int,Int) ] ) : Unit = {
       ls match {
@@ -118,14 +121,15 @@ object TicTacToe {
     buf.toString
   }
 
-  def isEmptyCell( grid: GridType, row : Int, col : Int ) : Boolean = grid(row)(col) == EMPTY
+  def isEmptyCell( grid: Grid, rc: RowCol ) : Boolean = grid(rc._1)(rc._2) == EMPTY
+  def isEmptyCell( grid: Grid, row: Int, col: Int ) : Boolean = grid(row)(col) == EMPTY
 
   /**
    * Produce a list of available cells for making the next move to.
    * @param grid The Tic-Tac-Toe grid
    * @return
    */
-  def availableCells(grid: GridType) : List[ (Int,Int) ] = {
+  def availableCells(grid: Grid) : List[ (Int,Int) ] = {
     var cells : List[ (Int,Int) ] = Nil.asInstanceOf[List[(Int,Int)]]
     if (isWinner(grid,mySeed) || isWinner(grid,oppSeed) ) return cells
     for( r <- 0 to 2 ) for( c <- 0 to 2 ) {
@@ -142,12 +146,12 @@ object TicTacToe {
    * @param col Whick column to mark
    * @return Content of cell
    */
-  def markCell( grid: GridType, player : Char, row : Int, col : Int ) : Char = {
+  def markCell( grid: Grid, player : Char, row : Int, col : Int ) : Char = {
     if( isEmptyCell(grid, row, col) ) grid(row)(col) = player
     grid(row)(col)
   }
 
-  def markCell( grid: GridType, player : Char, rowcol: (Int,Int) ) : Char = {
+  def markCell( grid: Grid, player : Char, rowcol: RowCol ) : Char = {
     markCell( grid, player, rowcol._1, rowcol._2 )
   }
 
@@ -157,7 +161,7 @@ object TicTacToe {
                0 otherwise
       Method adapted from: https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
     */
-  def evaluate( grid: GridType) : Int = {
+  def evaluate( grid: Grid) : Int = {
     var score : Int = 0
     // Evaluate score for each of the 8 lines (3 rows, 3 columns, 2 diagonals)
     score += evaluateLine(grid, 0, 0, 0, 1, 0, 2)  // row 0
@@ -176,7 +180,7 @@ object TicTacToe {
                0 otherwise
       Method adapted from: https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
     */
- def evaluateLine(grid : GridType,
+ def evaluateLine(grid : Grid,
                   row1 : Int, col1 : Int,
                   row2 : Int, col2 : Int,
                   row3 : Int, col3 : Int ) : Int  = {
@@ -233,14 +237,14 @@ object TicTacToe {
    * Select a random cell. To be used only at the start of each game. Not valid after this move has been made.
    * @return row and col as a Tuple2
    */
-  def randomMove() : (Int,Int) = {
+  def randomMove() : RowCol = {
     var rand : Random = new Random( System.currentTimeMillis() )
     var row = rand.nextInt(3)
     var col = rand.nextInt(3)
     (row,col)
   }
 
-  def move( grid: GridType, player : Char) : (Int,Int) = {
+  def move( grid: Grid, player : Char) : RowCol = {
     val move_ : (Int,Int,Int) = minimax(grid,2, player, Integer.MIN_VALUE, Integer.MAX_VALUE)
     // depth, max-turn, alpha, beta
     showGrid( grid )
@@ -252,7 +256,7 @@ object TicTacToe {
        @return score, row, and col as a Tuple3
       Method adapted from: https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
     */
-  def minimax(grid: GridType, depth : Int, player : Char, alpha : Int, beta: Int) : (Int,Int,Int) = {
+  def minimax(grid: Grid, depth : Int, player : Char, alpha : Int, beta: Int) : (Int,Int,Int) = {
     // Generate possible next moves in a list of int[2] of {row, col}.
     val nextMoves : List[(Int,Int)] = availableCells( grid )
     // mySeed is maximizing while oppSeed is minimizing
@@ -308,7 +312,7 @@ object TicTacToe {
     }
   }
 
-  def isGameOver( rowcol : (Int,Int) ) : Boolean = rowcol._1 == -1 && rowcol._2 == -1;
+  def isGameOver( rowcol : RowCol ) : Boolean = rowcol._1 == -1 && rowcol._2 == -1;
 
   /**
    * Play one game. Return the name of the winner if it's 'X' or 'O' otherwise return TIE if there was a tie.
@@ -316,17 +320,17 @@ object TicTacToe {
    */
   def playGame() : Char = {
     initGrid()
-    val initialMove : (Int,Int) = randomMove()
-    markCell( GRID, X, initialMove._1, initialMove._2 )
+    val initialMove : RowCol = randomMove()
+    markCell( GRID, X, initialMove )
     println( "Player " + X + " marks cell (" + initialMove._1 + "," + initialMove._2 + ")" )
     println( showGrid(GRID))
     breakable {
       for( i <- 1 to 50) {
-        val player : Char = if( i % 2 == 0 ) X else O
-        val rowcol: (Int, Int) = move(GRID, player)
+        val player : Char = if( i.%(2) == 0 ) X else O
+        val rowcol: RowCol = move(GRID, player)
         if (isGameOver( rowcol )) break
         println( "Player " + player + " marks cell (" + rowcol._1 + "," + rowcol._2 + ")" )
-        markCell(GRID, player, rowcol._1, rowcol._2)
+        markCell(GRID, player, rowcol)
         println(showGrid(GRID) )
       }
     }
