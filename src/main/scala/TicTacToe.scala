@@ -109,7 +109,7 @@ object TicTacToe {
    */
   def showAvailableCells( ls: List[ RowCol ] ) : String = {
     val buf: StringBuilder = new StringBuilder()
-    def buildString( buf : StringBuilder, ls : List[ (Int,Int) ] ) : Unit = {
+    def buildString( buf : StringBuilder, ls : List[ RowCol ] ) : Unit = {
       ls match {
         case h :: tail =>
           buf.append( "(" + h._1 + "," + h._2 + ")," )
@@ -129,8 +129,8 @@ object TicTacToe {
    * @param grid The Tic-Tac-Toe grid
    * @return
    */
-  def availableCells(grid: Grid) : List[ (Int,Int) ] = {
-    var cells : List[ (Int,Int) ] = Nil.asInstanceOf[List[(Int,Int)]]
+  def availableCells(grid: Grid) : List[ RowCol ] = {
+    var cells : List[ RowCol ] = Nil.asInstanceOf[List[RowCol]]
     if (isWinner(grid,mySeed) || isWinner(grid,oppSeed) ) return cells
     for( r <- 0 to 2 ) for( c <- 0 to 2 ) {
       if (isEmptyCell(grid, r, c)) cells = cells :+ (r, c)
@@ -258,7 +258,7 @@ object TicTacToe {
     */
   def minimax(grid: Grid, depth : Int, player : Char, alpha : Int, beta: Int) : (Int,Int,Int) = {
     // Generate possible next moves in a list of int[2] of {row, col}.
-    val nextMoves : List[(Int,Int)] = availableCells( grid )
+    val nextMoves : List[RowCol] = availableCells( grid )
     // mySeed is maximizing while oppSeed is minimizing
     var score : Int = 0
     var bestRow : Int = -1
