@@ -51,21 +51,17 @@ object Course3d {
    */
   def readinput( path : String ) : (Int,Int,List[String]) = {
     val lines = Source.fromFile(path).getLines()
-    var kt : Array[Int] = lines.next.split(" ").map(_.toInt)
+    val kt : Array[Int] = lines.next.split(" ").map(_.toInt)
     var dna = ListBuffer[String]()
-    def dnaAppend( dna : ListBuffer[String], line: String ) : Unit = {
-      dna += line
-    }
     while( lines.hasNext ) {
-      dnaAppend( dna, lines.next )
+      dna += lines.next
     }
     (kt(0),kt(1),dna.toList)
   }
 
   /**
    * Print contents of input data.
-   * @param data
-   * @return Tuple containing k, t, and dna list values.
+   * @param data Tuple containing k, t, and dna list values.
    */
   def displayInput( data : (Int,Int,List[String] ) ) : Unit = {
     println( "k=" + data._1 + " t=" + data._2 )
