@@ -2,6 +2,10 @@
 //Solution to Rosalind challenge "3D: Greedy Motif Search"
 //See http://rosalind.info/problems/3d for details.
 //
+// With USE_PSEUDO_COUNTS set to true, this program also
+// solves problem 3e.
+//
+//
 //Given:
 //
 //    Integers k and t, followed by a collection of strings Dna.
@@ -18,7 +22,8 @@
 //
 //Version: 2.11.2
 //
-//See also: Bioinformatics Algorithms: An Active-Learning Approach by Phillip Compeau & Pavel Pevzner
+//See also: Bioinformatics Algorithms: An Active-Learning Approach
+//    by Phillip Compeau & Pavel Pevzner
 //
 //
 
@@ -27,17 +32,23 @@ package rosalind
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
 import scala.math._
+import scala.util.Random
 
 object Course3d {
 
   type TwoDArray[A] = Array[Array[A]]
 
-  val USE_PSEUDO_COUNTS : Boolean = false
+  val USE_PSEUDO_COUNTS : Boolean = true
 
-  val FOLDER : String = ""
-  val DATA : String = "rosalind_3d.txt"
+  val FOLDER : String = "c:/downloads/"
+  val DATA : String = "rosalind_3e.txt"
   val ACGT_MAP = Map[Char,Int]( 'A' -> 0, 'C'-> 1, 'G' -> 2, 'T' -> 3 )
 
+  /**
+   * Read input
+   * @param path
+   * @return Tuple containing k, t, and dna list values.
+   */
   def readinput( path : String ) : (Int,Int,List[String]) = {
     val lines = Source.fromFile(path).getLines()
     var kt : Array[Int] = lines.next.split(" ").map(_.toInt)
@@ -51,12 +62,22 @@ object Course3d {
     (kt(0),kt(1),dna.toList)
   }
 
+  /**
+   * Print contents of input data.
+   * @param data
+   * @return Tuple containing k, t, and dna list values.
+   */
   def displayInput( data : (Int,Int,List[String] ) ) : Unit = {
     println( "k=" + data._1 + " t=" + data._2 )
     println( "dna=" )
     data._3.foreach( println )
   }
 
+  /**
+   * Print contents of list of motifs. For debugging.
+   * @param label What to name the output.
+   * @param motifs List of motifs
+   */
   def dumpMotifs( label : String, motifs : List[String] ) : Unit = {
     val iter : Iterator[String] = motifs.iterator
     while( iter.hasNext ) {
@@ -64,6 +85,12 @@ object Course3d {
     }
   }
 
+  /**
+   * Print contents of 2d array of values. For debugging.
+   * @param label What to name the output.
+   * @param array 2d array of values.
+   * @tparam A
+   */
   def dump2dArray[A]( label : String, array : TwoDArray[A] ) : Unit = {
     println( label )
     val rowIter = array.iterator
@@ -77,20 +104,24 @@ object Course3d {
     }
   }
 
+  /**
+   * Find the most probable k-mer in the DNA string.
+   * @param dna DNA string.
+   * @param k Size of k-mer.
+   * @param profile Probability matrix.
+   * @return Most probable k-mer.
+   */
   def mostProbableKmer( dna : String, k : Int, profile : TwoDArray[Float] ) : String = {
     //println( "dna=" + dna )
     var bestProbability : Float = -1.0F
     var mostProbable = ""
-    var kmer : String = ""
     val dnalen : Int = dna.length - k + 1
     for( i <- 0 until dnalen ) {
-      //println( "i=" + i )
       var ki : Int = 0
       var probability : Float = 1.0F;
-      kmer = dna.substring( i, i + k )
-      //println( "kmer=" + kmer )
+      val kmer = dna.substring( i, i + k )
       for( j <- 0 until k ) {
-        val prob = profile( ACGT_MAP( kmer( j )))(ki)
+        val prob = profile( ACGT_MAP( kmer( j ) ))(ki)
         probability *= prob
         ki += 1
       }
@@ -99,10 +130,14 @@ object Course3d {
         mostProbable = kmer
       }
     }
-    //println( "Most probable Kmer=                                " + mostProbable )
     mostProbable
   }
 
+  /**
+   * Calculate the score of the list of motifs.
+   * @param motifs List of motifs.
+   * @return The score.
+   */
   def score( motifs : List[String] ) : Int = {
     val k : Int = motifs(0).length // assumes all motifs are the same length
     val counts : TwoDArray[Int] = Array.ofDim(4,k)
@@ -114,7 +149,6 @@ object Course3d {
         counts(ACGT_MAP( nucleotide))(i) += 1
       }
     }
-    //dump2dArray[Int]( "Counts:", counts )
     var sumcnts = List[Int]()
     for( i <- 0 until k ) {
       // find the maximum count in column i
@@ -124,20 +158,21 @@ object Course3d {
     k * motifs.size - sumcnts.foldLeft(0)(_+_)
   }
 
+  /**
+   * Create a probability matrix profile from list of motifs.
+   * @param motifs List of motifs.
+   * @return Probability profile.
+   */
   def makeProfile( motifs : List[String] ) : TwoDArray[Float] = {
-    var k : Int = motifs(0).length
+    var k : Int = motifs(0).length // assumes all motifs are the same length
     var profile : TwoDArray[Float] = Array.ofDim(4,k)
     var counts  : TwoDArray[Int] = Array.ofDim(4,k)
 
-    //dumpMotifs( "motifs:", motifs )
     val iter : Iterator[String] = motifs.iterator
     while( iter.hasNext ) {
       val motif : String = iter.next
-      //println( "motif in makeProfile=" + motif )
       for (i <- 0 until k ) {
-        //println( "nucleotide=" + motif(i))
         val nucIndex = ACGT_MAP(motif(i))
-        //println( "nucIndex=" + nucIndex )
         counts(nucIndex)(i) += 1
       }
     }
@@ -149,27 +184,30 @@ object Course3d {
         else {
           profile(j)(i) = counts(j)(i) / 4.0F
         }
-       }
+      }
     }
-    //dump2dArray[Int]( "Counts:", counts )
-    //dump2dArray[Float]( "TwoDFloatArray:", TwoDFloatArray )
     profile
   }
 
+  /**
+   * Perform greedy motif search for k-mers in list of t dna strings.
+   * @param dna List of dna strings.
+   * @param k Size of k-mer
+   * @param t Number of dna strings.
+   * @return List of the 'best' motifs.
+   */
   def greedyMotifSearch( dna: List[String], k : Int, t: Int ) : List[String] = {
     var bestScore : Int = k * t
-    var bestMotifs = List[String]()
+    var bestMotifs : List[String] = Nil
     var currentProfile : TwoDArray[Float] = Array.ofDim(4,k)
     val dnalen = dna(0).length - k + 1
     for( i <- 0 until dnalen ) {
       var motifs : List[String] = List(dna(0).substring(i,i+k))
       for( j <- 1 until t ) {
         val currentProfile = makeProfile(motifs)
-        //dump2dArray[Float]( "currentProfile:", currentProfile )
         motifs = motifs :+ mostProbableKmer( dna(j), k, currentProfile )
       }
       val currentScore = score(motifs)
-      //println( "currentScore=" + currentScore )
       if( currentScore < bestScore ) {
         bestScore = currentScore
         bestMotifs = motifs
@@ -178,6 +216,9 @@ object Course3d {
     bestMotifs
   }
 
+  /**
+   * Main execution method: read the input, analyze it, and output the results.
+   */
   def execute() : Unit = {
     var (k,t,dna_list) = readinput( FOLDER + DATA )
     displayInput((k,t,dna_list))
@@ -187,6 +228,9 @@ object Course3d {
   }
 
   def  main(args: Array[String]): Unit = {
+    val startTime = System.currentTimeMillis()
     execute()
+    val endTime = System.currentTimeMillis()
+    println( "Total time: " + (endTime-startTime)/1000.0D + " second(s)" )
   }
 }
