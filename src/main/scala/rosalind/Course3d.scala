@@ -113,13 +113,11 @@ object Course3d {
     var mostProbable = ""
     val dnalen : Int = dna.length - k + 1
     for( i <- 0 until dnalen ) {
-      var ki : Int = 0
       var probability : Float = 1.0F;
       val kmer = dna.substring( i, i + k )
       for( j <- 0 until k ) {
-        val prob = profile( ACGT_MAP( kmer( j ) ))(ki)
+        val prob = profile( ACGT_MAP( kmer( j ) ))(j)
         probability *= prob
-        ki += 1
       }
       if( probability > bestProbability ) {
         bestProbability = probability
@@ -172,14 +170,10 @@ object Course3d {
         counts(nucIndex)(i) += 1
       }
     }
+    val pseudoCount = if( USE_PSEUDO_COUNTS) 1 else 0
     for (i <- 0 until k) {
       for (j <- 0 until 4) {
-        if( USE_PSEUDO_COUNTS ) {
-          profile(j)(i) = (counts(j)(i) + 1 ) / 4.0F
-        }
-        else {
-          profile(j)(i) = counts(j)(i) / 4.0F
-        }
+        profile(j)(i) = (counts(j)(i) + pseudoCount ) / 4.0F
       }
     }
     profile
