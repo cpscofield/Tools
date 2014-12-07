@@ -50,7 +50,6 @@ object OrderingByTuple1stParam extends Ordering[(String,String)] {
 object Course4b {
 
   val FOLDER : String = "c:/downloads/"
-  //val FOLDER : String = "C:\\Users\\SCOFIELD\\Documents\\Stash\\Sandbox\\ScalaEx\\IdeaProjects\\Course4b\\data\\"
   val DATA   : String = "dataset_198_9 (3).txt"
 
   /**
@@ -78,9 +77,9 @@ object Course4b {
     def checkAdjacency( kmers1 :List[String], kmers2 : List[String]) : Unit = {
       (kmers1,kmers2) match {
         case( Nil, Nil ) => return
-        case (Nil,_)     => return
-        case( _, Nil)    => return
-        case( _, _ ) => {
+        case (Nil, _   ) => return
+        case( _,   Nil ) => return
+        case( _,   _   ) => {
           val k1 = kmers1.head
           val k2 = kmers2.head
           //println( "Comparing " + k1 + " with " + k2 )
@@ -143,7 +142,7 @@ object Course4b {
             }
             case 0 => { // k1 == k2
               //println( k1 + " -> " + k2 )
-              adjacencyList = adjacencyList :+(k1, k2)
+              adjacencyList = adjacencyList :+ (k1, k2)
               _kmers1 = _kmers1.tail
               _kmers2 = _kmers2.tail
             }
@@ -164,9 +163,8 @@ object Course4b {
   def execute() : Unit = {
     val kmers = readinput( FOLDER + DATA ).sorted( SubStringOrdering )
     val kmersDuped = kmers.sorted
-    println( kmers.length + " k-mers in input" )
+    //println( kmers.length + " k-mers in input" )
     val adjacencyList = calcOverlapGraph2( kmers, kmersDuped )
-    println( "\n\n\n")
     for( t <- adjacencyList ) {
       println( t._1 + " -> " + t._2 )
     }
