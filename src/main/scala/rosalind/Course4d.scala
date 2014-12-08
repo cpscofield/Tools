@@ -47,6 +47,9 @@ import scala.collection.mutable.ListBuffer
 
 object Course4d {
 
+  type DeBruijnNode  = ( String, List[ String ] )
+  type DeBruijnGraph = mutable.Map[ String, List[String ]]
+
   val FOLDER : String = "c:/downloads/"
   //val FOLDER: String = "C:\\Users\\SCOFIELD\\Documents\\Stash\\Sandbox\\ScalaEx\\IdeaProjects\\Course4d\\data\\"
   val DATA: String = "dataset_200_7.txt"
@@ -69,8 +72,8 @@ object Course4d {
    * Dump DeBruijn graph. For debugging.
    * @param graph
    */
-  def dumpGraph( graph: mutable.Map[ String, List[String ]] ) : Unit = {
-    val iter : Iterator[ (String, List[String]) ] = graph.iterator
+  def dumpGraph( graph: DeBruijnGraph ) : Unit = {
+    val iter : Iterator[ DeBruijnNode ] = graph.iterator
     while( iter.hasNext ) {
       val keyValue = iter.next
       print( keyValue._1 + " => " )
@@ -87,22 +90,27 @@ object Course4d {
    * @param kmers
    * @return DeBruijn graph
    */
-  def makeGraph( kmers : List[ String ] ) : mutable.Map[String, List[String] ] = {
-    var graph = mutable.Map.empty[String, List[String]]
+  def makeGraph( kmers : List[ String ] ) : DeBruijnGraph = {
+
+    def addNode( graph : DeBruijnGraph, key : String, value : String ) : Unit = {
+      var pvalue = graph.getOrElse( key, Nil )
+      if( pvalue == None ) {
+        graph( key ) = List(value)
+      }
+      else {
+        pvalue = pvalue :+ value
+        graph( key ) = pvalue
+      }
+
+    }
+    var graph : DeBruijnGraph = mutable.Map.empty
     val klen: Int = kmers(0).length
     val iter = kmers.iterator
     while( iter.hasNext ) {
       val kmer = iter.next
       val prefix = kmer.substring( 0, klen - 1 )
       val suffix = kmer.substring( 1, klen )
-      var pvalue = graph.getOrElse( prefix, Nil )
-      if( pvalue.size == 0 ) {
-        graph( prefix ) = List(suffix)
-      }
-      else {
-        pvalue = pvalue :+ suffix
-        graph( prefix ) = pvalue
-      }
+      addNode( graph, prefix, suffix )
     }
     //dumpGraph( graph )
     graph
@@ -112,7 +120,7 @@ object Course4d {
    * Print DeBruijn node
    * @param node
    */
-  def printNode( node : (String,List[String]) ) : Unit = {
+  def printNode( node : DeBruijnNode ) : Unit = {
     print( node._1 + " -> " )
     for( i <- 0 until node._2.size ) {
       if( i > 0 ) print( "," )

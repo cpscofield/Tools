@@ -45,6 +45,9 @@ import scala.collection.mutable
 
 object Course4c {
 
+  type DeBruijnNode  = ( String, List[ String ] )
+  type DeBruijnGraph = mutable.Map[ String, List[String ]]
+
 
   val FOLDER : String = "c:/downloads/"
   //val FOLDER: String = "C:\\Users\\SCOFIELD\\Documents\\Stash\\Sandbox\\ScalaEx\\IdeaProjects\\Course4c\\data\\"
@@ -66,11 +69,11 @@ object Course4c {
    * Dump the graph. For debugging.
    * @param graph
    */
-  def dumpGraph( graph: mutable.Map[ String, List[String ]] ) : Unit = {
-    val iter : Iterator[ (String, List[String]) ] = graph.iterator
+  def dumpGraph( graph: DeBruijnGraph ) : Unit = {
+    val iter : Iterator[ DeBruijnNode ] = graph.iterator
     while( iter.hasNext ) {
       val keyValue = iter.next
-      //print( keyValue._1 + " => " )
+      print( keyValue._1 + " => " )
       val iter2 = keyValue._2.iterator
       while( iter2.hasNext ) {
         print( iter2.next + "," )
@@ -85,19 +88,24 @@ object Course4c {
    * @param dna DNA string
    * @return DeBruijn graph
    */
-  def makeGraph(k: Int, dna: String): mutable.Map[ String, List[String ]] = {
-    var graph = mutable.Map.empty[ String, List[String] ]
-    val dnalen = dna.length - ( k - 1 )
-    for (i <- 0 until dnalen) {
-      val key = dna.substring(i,i+(k-1))
-      val value = dna.substring(i+1,i+k)
-      //println( "key=" + key + " value=" + value )
+  def makeGraph(k: Int, dna: String): DeBruijnGraph = {
+
+    def addNode( graph : DeBruijnGraph, key : String, value : String ) : Unit = {
       var v = graph.getOrElse( key, Nil )
-      if( v.size == 0 ) graph(key) = List(value)
+      if( v == None ) graph( key ) = List(value)
       else {
         v = v :+ value
-        graph( key ) = v
+        graph( key )  = v
       }
+    }
+
+    var graph : DeBruijnGraph = mutable.Map.empty
+    val dnalen = dna.length - ( k - 1 )
+    for (i <- 0 until dnalen) {
+      val key   = dna.substring(i,i+(k-1))
+      val value = dna.substring(i+1,i+k)
+      //println( "key=" + key + " value=" + value )
+      addNode( graph, key, value )
     }
     //dumpGraph( graph )
     graph
@@ -107,7 +115,7 @@ object Course4c {
    * Print a node of the DeBruijn graph.
    * @param node
    */
-  def printNode( node : (String,List[String]) ) : Unit = {
+  def printNode( node : DeBruijnNode ) : Unit = {
     print( node._1 + " -> " )
     for( i <- 0 until node._2.size ) {
       if( i > 0 ) print( "," )
