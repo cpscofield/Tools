@@ -89,10 +89,7 @@ object Course4d {
    */
   def makeGraph( kmers : List[ String ] ) : mutable.Map[String, List[String] ] = {
     var graph = mutable.Map.empty[String, List[String]]
-
     val klen: Int = kmers(0).length
-    var ksuffixes = mutable.Set.empty[String]
-
     val iter = kmers.iterator
     while( iter.hasNext ) {
       val kmer = iter.next
