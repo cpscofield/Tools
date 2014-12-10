@@ -5,7 +5,10 @@ import java.io.File
 /**
  * This program will traverse a directory tree at a given starting point and produce
  * a listing of files and directories along with their sizes.
+ *
+ * This is an adaption of code published in Cay Horstmann's book "Scala for the Impatient".
  */
+
 object DirSize {
 
     var SHOW_FILES : Boolean = false
