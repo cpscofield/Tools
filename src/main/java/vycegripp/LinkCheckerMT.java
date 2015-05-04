@@ -28,6 +28,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Attribute;
+import org.jsoup.select.Elements;
+import vycegripp.utilities.PageReader;
 
 /**
  * <p>
@@ -57,9 +64,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * </pre>
  * </p>
  * 
- * @since 1.5
+ * This program uses the JSoup library (from http://jsoup.org).
+ * Also uses PageReader Java utility from this repository (Tools/src/main/java/vycegripp/utilities/PageReader.java)
+ * 
+ * @since 1.7
  * @author Cary Scofield (carys689@gmail.com)
- * @date November/December 2012
+ * @date November/December 2012; updated to use JSoup May 2015.
  */
 public final class LinkCheckerMT {
 
@@ -122,15 +132,10 @@ public final class LinkCheckerMT {
         final long startTime = System.currentTimeMillis();
         long endTime = startTime;
         try {
-            InputStream is = openURL(new URI(url));
-            try {
-                // Load up the linksToTest object.
-                this.getLinksFromPage( is );
-            } catch (EOFException e) {
-                this.setLinkCount( linksToTest.size() );
-                System.out.println( this.getLinkCount() + " link(s) found. Proceeding with connectivity tests.");
-            }
 
+            StringBuilder page = PageReader.readPage(new URI(url));
+            this.getLinksFromPage(page.toString(), linksToTest);
+            
             // Kick off the link checker threads and wait for completion of all tasks.
             execService = this.launchLinkCheckers( MAX_THREADS );
             boolean completed = this.waitForCompletion( execService );
@@ -178,26 +183,23 @@ public final class LinkCheckerMT {
 
     /**
      * Get all HTTP links from web page. Results are placed in linksToTest.
-     * @param is Web page is opened on this stream.
-     * @throws EOFException End-of-file reached on web page.
-     * @throws Exception
      */
-    private void getLinksFromPage(InputStream is) throws Exception {
-        try {
-            while (true) {
-                String linkValue = getNextLinkValue(is);
-                if (linkValue == null) {
-                    break;
-                }
-                //System.out.println("Adding to list of links to test: " + linkValue);
-                if (isHttpLink(linkValue)) {
-                    linksToTest.add(linkValue);
+    private void getLinksFromPage(String page,
+            ConcurrentLinkedQueue<String> linksToTest) throws Exception {
+        Document document = Jsoup.parse(page.toString());
+        Elements elements = document.getElementsByTag("a");
+        for (Element element : elements) {
+            Attributes attributes = element.attributes();
+            for (Attribute attribute : attributes) {
+                String key = attribute.getKey();
+                if (key.toLowerCase().equals("href")) {
+                    String value = attribute.getValue().toLowerCase();
+                    if (value.startsWith("http")) {
+                        linksToTest.add(value);
+                    }
                 }
             }
-        } catch (EOFException e) {
-            throw e;
         }
-
     }
 
     // Number of links where connectivity failed. Not thread safe and not shared.
@@ -345,185 +347,23 @@ public final class LinkCheckerMT {
         }
     }
 
-    /**
-     * Open a stream to the URL.
-     * @param uri: The URI to open.
-     * @return InputStream, in particular a BufferedInputStream
-     * @throws Exception 
-     */
-    private static InputStream openURL( final URI uri ) throws Exception {
-        if( uri == null ) throw new IllegalArgumentException( "uri is null" );
-        final URL url = uri.toURL();
-        final InputStream is = url.openStream();
-        final BufferedInputStream bis = new BufferedInputStream( is, 4096 );
-        return bis;
-    }
+//    /**
+//     * Encode the query portion of the link if it exists.
+//     * @param link
+//     * @return Properly encoded link.
+//     * @throws Exception
+//     */
+//    private static String encodeQueryString( final String link) throws Exception {
+//        final int beginQuery = link.indexOf("?");
+//        final boolean queryPresent = beginQuery != -1;
+//        if (queryPresent) {
+//            final StringBuilder revisedLink = new StringBuilder();
+//            revisedLink.append( link.substring( 0, beginQuery+1 ) );
+//            revisedLink.append( URLEncoder.encode( link.substring( beginQuery+1 ), DEFAULT_ENCODING ) );
+//            return revisedLink.toString();
+//        } else {
+//            return link;
+//        }
+//    }
 
-    /**
-     * Read a character from the InputStream.
-     * @param is: InputStream
-     * @return char: Character read from input.
-     * @throws CharConversionException: If illegal character found in input.
-     * @throws EOFException: If end-of-file reached
-     * @throws IOException: On any other I/O error.
-    */
-    private static char readChar( final InputStream is ) throws IOException, EOFException, CharConversionException {
-        final int END_OF_FILE = -1;
-        final int MAX_CHAR_VALUE = 0xff;
-        final int ch = is.read();
-        if( ch == END_OF_FILE ) throw new EOFException();
-        if( ch > MAX_CHAR_VALUE ) throw new CharConversionException();
-        if( TRACING_CHAR_INPUT ) System.err.print( (char)ch );
-        return (char)ch;
-    }
-
-    /**
-     * Read a character from the InputStream, skipping any whitespace.
-     * @param is: InputStream
-     * @param skipWhitespace: Tells method whether or not to skip whitespace.
-     * @return char: Character read from input.
-     * @throws CharConversionException: If illegal character found in input.
-     * @throws EOFException: If end-of-file reached
-     * @throws IOException: On any other I/O error.
-    */
-    private static char readChar( final InputStream is, final boolean skipWhitespace ) throws IOException, EOFException, CharConversionException {
-        int ch = readChar( is );
-        if( skipWhitespace ) {
-            while (Character.isWhitespace(ch)) {
-                ch = readChar(is);
-            }
-        }
-        return (char)ch;
-    }
-    
-    /**
-     * Skip HTML comment if found.
-     * @param is: InputStream
-     * @return Next character in input if no comment found; otherwise, character immediately following comment.
-     * @throws Exception 
-     */
-    private static char skipComment(final InputStream is) throws Exception {
-        char ch = readChar(is);
-        if (ch == '<') {
-            ch = readChar(is);
-            if (ch == '!') {
-                ch = readChar(is);
-                if (ch == '-') {
-                    ch = readChar(is);
-                    if (ch == '-') {
-                        ch = skipRestOfComment(is);
-                    }
-                }
-            }
-        }
-        return ch;
-    }
-
-    /**
-     * Skip rest of comment in input.
-     * @param is: InputStream
-     * @return Character immediately following the end of the comment.
-     * @throws Exception 
-     */
-    private static char skipRestOfComment( final InputStream is ) throws Exception {
-        char ch = ' ';
-        while( true ) {
-            ch = readChar( is );
-            if( ch != '-' ) continue;
-            ch = readChar( is );
-            if( ch != '-' ) continue;
-            ch = readChar( is );
-            if( ch != '>' ) continue;
-            // end of HTML comment found
-            ch = readChar( is );
-            break; 
-        }
-        return ch;
-    }
-    
-    /**
-     * Elicit the next link value as a string from the page source. Assumption:
-     * the web page we are scanning is syntactically correct and the InputStream
-     * object knows the current position in the page.
-     * 
-     * @param is: InputStream
-     * @return The value of the link attribute. 
-     *      For &lt;A&gt; element, it will be the HREF attribute. 
-     *      For the &lt;IMG&gt; element, it will be the SRC attribute.
-     * @throws EOFException When end-of-file encountered.
-     * @throws Exception For other exception.
-     */
-    private static String getNextLinkValue( final InputStream is ) throws EOFException, Exception {
-        final boolean SKIPWS = true; // Skip whitepace
-        final StringBuilder buf = new StringBuilder( 256 );
-        while( true ) {
-            try {
-                char ch = skipComment( is ); 
-                if( ch != 'h' && ch != 'H' ) {
-                    // See if this might be a link to an image file...
-                    if( ch != 's' && ch != 'S' ) continue;
-                    ch = readChar( is ); if( ch != 'r' && ch != 'R' ) continue;
-                    ch = readChar( is ); if( ch != 'c' && ch != 'C' ) continue;
-                    ch = readChar( is, SKIPWS ); if( ch != '=' ) continue;
-                    ch = readChar( is, SKIPWS ); if( ch != '"' ) continue;
-                    while ((ch = readChar(is)) != '"') {
-                        buf.append(ch);
-                    }
-                    break;
-                }
-                ch = readChar( is ); if( ch != 'r' && ch != 'R' ) continue;
-                ch = readChar( is ); if( ch != 'e' && ch != 'E' ) continue;
-                ch = readChar( is ); if( ch != 'f' && ch != 'F' ) continue;
-                ch = readChar( is, SKIPWS ); if( ch != '=' ) continue;
-                ch = readChar( is, SKIPWS ); if( ch != '"' ) continue;
-                while ((ch = readChar( is )) != '"') {
-                    buf.append(ch);
-                }
-            } catch (EOFException e) {
-                if( buf.length() == 0 ) throw e;
-            } catch (Exception e) {
-                System.err.println( e.toString() );
-                System.err.println( buf.toString() );
-                throw e;
-            } 
-        
-            break;
-        }
-
-        if (buf.length() == 0) {
-            return null;
-        } else {
-            return encodeQueryString( buf.toString() );
-        }
-    }
-
-    /**
-     * Encode the query portion of the link if it exists.
-     * @param link
-     * @return Properly encoded link.
-     * @throws Exception
-     */
-    private static String encodeQueryString( final String link) throws Exception {
-        final int beginQuery = link.indexOf("?");
-        final boolean queryPresent = beginQuery != -1;
-        if (queryPresent) {
-            final StringBuilder revisedLink = new StringBuilder();
-            revisedLink.append( link.substring( 0, beginQuery+1 ) );
-            revisedLink.append( URLEncoder.encode( link.substring( beginQuery+1 ), DEFAULT_ENCODING ) );
-            return revisedLink.toString();
-        } else {
-            return link;
-        }
-    }
-
-    /**
-     * Check to see if link begins with the string "http".
-     * @param linkValue: String containing the URL.
-     * @return <tt>true</tt> if "http" found; otherwise, return <tt>false</tt>.
-     * @throws Exception 
-     */
-    private static boolean isHttpLink( final String linkValue ) throws Exception {
-        return linkValue.toLowerCase().startsWith( "http" );
-    }
-    
 }
