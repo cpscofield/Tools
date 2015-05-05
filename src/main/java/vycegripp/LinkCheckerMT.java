@@ -88,12 +88,12 @@ public final class LinkCheckerMT {
         System.exit( 0 );
     }
 
-    public final static int     MAX_THREADS = 4; // On a dual-core machine, this is plenty
+    public final static int MAX_THREADS = 4; // On a dual-core machine, this is plenty
     public final static boolean TRACING_CHAR_INPUT = false;
     public final static boolean TRACING_URLS = true;
-    public final static double  MILLISECS_PER_SECOND = 1000.0D;
-    public final static String  DEFAULT_ENCODING = "UTF-8";
-    public final static int     WAIT_FOR_COMPLETION_IN_SECONDS = 60;
+    public final static double MILLISECS_PER_SECOND = 1000.0D;
+    public final static int WAIT_FOR_COMPLETION_IN_SECONDS = 60;
+    public final static String DEFAULT_ENCODING = "UTF-8";
 
     // A distinguishable exception class to indicate that a "bad" link was found.
     static final class BadLinkException extends Exception {
@@ -134,7 +134,7 @@ public final class LinkCheckerMT {
         try {
 
             StringBuilder page = PageReader.readPage(new URI(url));
-            this.getLinksFromPage(page.toString(), linksToTest);
+            LinkCheckerMT.getLinksFromPage(page.toString(), linksToTest);
             
             // Kick off the link checker threads and wait for completion of all tasks.
             execService = this.launchLinkCheckers( MAX_THREADS );
@@ -184,22 +184,13 @@ public final class LinkCheckerMT {
     /**
      * Get all HTTP links from web page. Results are placed in linksToTest.
      */
-    private void getLinksFromPage(String page,
+    private static void getLinksFromPage(String page,
             ConcurrentLinkedQueue<String> linksToTest) throws Exception {
-        Document document = Jsoup.parse(page.toString());
-        Elements elements = document.getElementsByTag("a");
-        for (Element element : elements) {
-            Attributes attributes = element.attributes();
-            for (Attribute attribute : attributes) {
-                String key = attribute.getKey();
-                if (key.toLowerCase().equals("href")) {
-                    String value = attribute.getValue().toLowerCase();
-                    if (value.startsWith("http")) {
-                        linksToTest.add(value);
-                    }
-                }
-            }
-        }
+        
+        Document document = Jsoup.parse(page);
+        extractLinksFromTags(document, "A", "href", linksToTest);
+        extractLinksFromTags(document, "OPTION", "value", linksToTest);
+
     }
 
     // Number of links where connectivity failed. Not thread safe and not shared.
@@ -347,12 +338,38 @@ public final class LinkCheckerMT {
         }
     }
 
-//    /**
-//     * Encode the query portion of the link if it exists.
-//     * @param link
-//     * @return Properly encoded link.
-//     * @throws Exception
-//     */
+    /**
+     * Extract link from elements of a particular tag.
+     * @param document The document.
+     * @param tag The tag   
+     * @param attributeName The attribute where the link text should be found
+     * @param linksToTest Queue of links to be tested
+     * @throws Exception 
+     */
+    private static void extractLinksFromTags(final Document document, final String tag,
+            final String attributeName, ConcurrentLinkedQueue<String> linksToTest) throws Exception {
+        Elements elements = document.getElementsByTag(tag);
+        for (Element element : elements) {
+            Attributes attributes = element.attributes();
+            for (Attribute attribute : attributes) {
+                String key = attribute.getKey();
+                if (key.toLowerCase().equals(attributeName)) {
+                    String value = attribute.getValue().toLowerCase();
+                    if (value.trim().length() > 0 && value.startsWith("http")) {
+                        linksToTest.add(stripQueryString(value));
+                    }
+                    break; // we found the attribute we're looking for
+                }
+            }
+        }
+    }
+
+    /**
+     * Encode the query portion of the link if it exists.
+     * @param link
+     * @return Properly encoded link.
+     * @throws Exception
+     */
 //    private static String encodeQueryString( final String link) throws Exception {
 //        final int beginQuery = link.indexOf("?");
 //        final boolean queryPresent = beginQuery != -1;
@@ -365,5 +382,21 @@ public final class LinkCheckerMT {
 //            return link;
 //        }
 //    }
+    
+    /**
+     * Remove query string portion of link if present
+     * @param link
+     * @return link without query string.
+     * @throws Exception 
+     */
+    private static String stripQueryString(final String link) throws Exception {
+        final int beginQuery = link.indexOf("?");
+        final boolean queryPresent = beginQuery != -1;
+        if (queryPresent) {
+            return link.substring(0, beginQuery);
+        } else {
+            return link;
+        }
+    }
 
 }
