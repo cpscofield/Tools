@@ -8,22 +8,27 @@
 // WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
 // =============================================================================
 
+// =============================================================================
+// NOTE: A Scala version of this program exists in this repository at
+// https://github.com/cpscofield/Tools/blob/master/src/main/scala/vycegripp/LinkCheckerMT.scala
+// =============================================================================
+
 package vycegripp;
 
 import java.io.InputStream;
-import java.io.IOException;
-import java.io.EOFException;
+//import java.io.IOException;
+//import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.BufferedInputStream;
-import java.io.CharConversionException;
-import java.net.URI;
+//import java.io.BufferedInputStream;
+//import java.io.CharConversionException;
 import java.net.URL;
-import java.net.URLEncoder;
+import java.net.URI;
+//import java.net.URLEncoder;
 import java.net.URLDecoder;
 import java.util.Properties;
 import java.util.NoSuchElementException;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executors; 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -64,8 +69,12 @@ import vycegripp.utilities.PageReader;
  * </pre>
  * </p>
  * 
- * This program uses the JSoup library (from http://jsoup.org).
- * Also uses PageReader Java utility from this repository (Tools/src/main/java/vycegripp/utilities/PageReader.java)
+ * <p>
+ * This program uses the following:
+ * <ul>
+ * <li>JSoup library (from http://jsoup.org).
+ * <li>PageReader Java utility from this repository (Tools/src/main/java/vycegripp/utilities/PageReader.java)
+ * </ul>
  * 
  * @since 1.7
  * @author Cary Scofield (carys689@gmail.com)
@@ -94,6 +103,8 @@ public final class LinkCheckerMT {
     public final static double MILLISECS_PER_SECOND = 1000.0D;
     public final static int WAIT_FOR_COMPLETION_IN_SECONDS = 60;
     public final static String DEFAULT_ENCODING = "UTF-8";
+    public final static boolean TRY_AGAIN = true;
+    public final static int TRY_AGAIN_SLEEP_INTERVAL = 5000; // in milliseconds
 
     // A distinguishable exception class to indicate that a "bad" link was found.
     static final class BadLinkException extends Exception {
@@ -289,7 +300,19 @@ public final class LinkCheckerMT {
                         // fails, add link to bad link queue.
                         incrementLinksTested();
                         if (!checkLink(new URI(linkToTest))) {
-                            throw new BadLinkException(linkToTest);
+                            if (TRY_AGAIN) {
+                                try {
+                                    System.out.println(Thread.currentThread().getName() + " sleeping for 2nd check on " + linkToTest);
+                                    Thread.sleep(TRY_AGAIN_SLEEP_INTERVAL);
+                                } catch (InterruptedException e) {
+                                    // Do nothing
+                                }
+                                if (!checkLink(new URI(linkToTest))) {
+                                    throw new BadLinkException(linkToTest);
+                                }
+                            } else {
+                                throw new BadLinkException(linkToTest);
+                            }
                         }
                     } catch (BadLinkException e) {
                         badLinks.add(URLDecoder.decode(linkToTest, DEFAULT_ENCODING));
@@ -317,9 +340,8 @@ public final class LinkCheckerMT {
      * Check to see if we can connect to the link.
      * @param uri: The link we are going to check.
      * @return <tt>true</tt> if link is okay; otherwise <tt>false</tt>.
-     * @throws BadLinkException If unable to connect to the site.
      */
-    private static boolean checkLink( final URI uri ) throws BadLinkException {
+    private static boolean checkLink( final URI uri ) {
         if( uri == null ) throw new IllegalArgumentException( "uri is null" );
         boolean valid = false;
         try {
@@ -330,11 +352,12 @@ public final class LinkCheckerMT {
                 valid = true;
                 is.close();
             }
-            return valid;
         }
         catch( Exception e ) {
             if( uri.toString().indexOf( "finance.yahoo.com" ) != -1 ) e.printStackTrace();
-            throw new BadLinkException( "\t" + uri.toString(), e );
+        }
+        finally {
+            return valid;
         }
     }
 
